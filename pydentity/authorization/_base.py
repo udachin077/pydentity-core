@@ -177,7 +177,7 @@ class ClaimsAuthorizationRequirement(IAuthorizationHandler):
             predicate = (lambda c: c.type.casefold() == self.claim_type.casefold())
             if self.allowed_values:
                 predicate = (
-                    lambda c: c.type.casefold() == self.claim_type.casefold() and c.http_context in self.allowed_values
+                    lambda c: c.type.casefold() == self.claim_type.casefold() and c.value in self.allowed_values
                 )
 
             if any(True for c in context.user.claims if predicate(c)):
