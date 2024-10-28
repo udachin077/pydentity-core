@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pydentity-core"
-version = "0.2.3"
+version = "0.2.4"
 description = ""
 authors = ["Udachin Ivan <pypi.udachin@yandex.ru>"]
 license = "MIT"
@@ -13,7 +13,7 @@ packages = [{ include = "pydentity", from = "." }]
 python = "^3.12"
 email-validator = "^2.2.0"
 itsdangerous = "^2.2.0"
-cryptography = "43.0.*"
+cryptography = "^43.0.3"
 pyotp = "^2.9.0"
 pwdlib = { version = "0.2.*", extras = ["argon2", "bcrypt"] }
 py-machineid = { version = "0.6.*", optional = true }
