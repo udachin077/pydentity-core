@@ -314,6 +314,8 @@ class SignInManager(Generic[TUser]):
         user = await self.user_manager.find_by_name(username)
 
         if not user:
+            # Run the hasher to mitigate timing attack
+            self.user_manager.password_hasher.hash_password(user, password)
             return SignInResult.failed()
 
         attempt = await self.check_password_sign_in(user, password, lockout_on_failure)
