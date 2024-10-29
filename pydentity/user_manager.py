@@ -1294,7 +1294,8 @@ class UserManager(Generic[TUser]):
         lockout_time = await store.get_lockout_end_date(user)
         if not lockout_time:
             return False
-        return datetime.utcnow().timestamp() <= lockout_time.timestamp()
+
+        return lockout_time >= datetime.utcnow()
 
     async def set_lockout_enable(self, user: TUser, enabled: bool) -> IdentityResult:
         """
@@ -1377,7 +1378,7 @@ class UserManager(Generic[TUser]):
         self._logger.warning('User is locked out.')
         await store.set_lockout_end_date(
             user,
-            datetime.utcnow().add(self.options.lockout.default_lockout_timespan)
+            datetime.now().add(self.options.lockout.default_lockout_timespan)
         )
         await store.reset_access_failed_count(user)
         return await self._update_user(user)
