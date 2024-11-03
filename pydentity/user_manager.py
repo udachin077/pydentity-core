@@ -1597,12 +1597,10 @@ class UserManager(Generic[TUser]):
             raise ArgumentNoneException('user')
 
         key = await self.get_authenticator_key(user)
-        enabled = await self.get_two_factor_enabled(user)
 
-        if not enabled or not key:
+        if not key:
             self._logger.error(
                 f"Unable to load two-factor authentication user. "
-                f"Enabled 2FA: {enabled}. "
                 f"Authenticator key: {'UNDEFINED' if not key else 'INSTALLED'}."
             )
             raise InvalidOperationException("Unable to load two-factor authentication user.")
