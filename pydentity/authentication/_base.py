@@ -1,6 +1,6 @@
 import base64
 import platform
-from collections.abc import Callable, Iterable
+from collections.abc import Iterable, Callable
 from inspect import isfunction
 from typing import overload, Any
 
@@ -11,7 +11,8 @@ from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from pydentity.authentication.interfaces import (
     IAuthenticationDataProtector,
     IAuthenticationHandler,
-    IAuthenticationSchemeProvider, IAuthenticationOptionsAccessor,
+    IAuthenticationSchemeProvider,
+    IAuthenticationOptionsAccessor,
 )
 from pydentity.exc import ArgumentNoneException, InvalidOperationException
 from pydentity.security.claims import ClaimsPrincipal

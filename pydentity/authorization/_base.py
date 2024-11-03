@@ -1,9 +1,12 @@
-from collections.abc import Callable, Awaitable, Iterable
+from collections.abc import Iterable, Callable, Awaitable
 from inspect import isfunction
 from typing import Literal, Any, overload
 
-from pydentity.authorization.interfaces import IAuthorizationPolicyProvider, IAuthorizationHandler, \
-    IAuthorizationOptionsAccessor
+from pydentity.authorization.interfaces import (
+    IAuthorizationPolicyProvider,
+    IAuthorizationHandler,
+    IAuthorizationOptionsAccessor,
+)
 from pydentity.exc import ArgumentNoneException, InvalidOperationException
 from pydentity.security.claims import ClaimsPrincipal
 from pydentity.types import TRequest
