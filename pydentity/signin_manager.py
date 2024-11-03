@@ -387,15 +387,15 @@ class SignInManager(Generic[TUser]):
         result = await self.context.authenticate(IdentityConstants.TwoFactorRememberMeScheme)
         return bool(result.principal and result.principal.find_first_value(ClaimTypes.Name) == user_id)
 
-    async def remember_two_factor_client(self, user: TUser):
+    async def remember_two_factor_client(self, user: TUser) -> None:
         await self.context.sign_in(
             IdentityConstants.TwoFactorRememberMeScheme,
             await self._store_remember_client(user),
             is_persistent=True
         )
 
-    async def forget_two_factor_client(self):
-        return self.context.sign_out(IdentityConstants.TwoFactorRememberMeScheme)
+    async def forget_two_factor_client(self) -> None:
+        return await self.context.sign_out(IdentityConstants.TwoFactorRememberMeScheme)
 
     async def two_factor_recovery_code_sign_in(self, recovery_code: str) -> SignInResult:
         two_factor_info = await self.retrieve_two_factor_info()
