@@ -1502,9 +1502,10 @@ class UserManager(Generic[TUser]):
         await self._update_security_stamp_internal(user)
         return await self._update_user(user)
 
-    def generate_new_authenticator_key(self) -> str:  # noqa
+    def generate_new_authenticator_key(self, length: int = 32) -> str:  # noqa
         """Generates a value suitable for use in authenticator."""
-        return str(uuid.uuid4())
+        import pyotp
+        return pyotp.random_base32(length=length)
 
     async def generate_new_two_factor_recovery_codes(self, user: TUser, number: int) -> Optional[set[str]]:
         """
