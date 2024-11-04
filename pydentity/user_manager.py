@@ -1,4 +1,3 @@
-import base64
 import datetime as dt
 import random
 import uuid
@@ -1572,7 +1571,7 @@ class UserManager(Generic[TUser]):
             self,
             user: TUser,
             name: str | None = None,
-            appname: str = "Pydentity.Application",
+            title: str = "Pydentity.Application",
             *,
             digits: int = 6,
             digest: Any = None,
@@ -1586,8 +1585,7 @@ class UserManager(Generic[TUser]):
 
         :param user: The user to create the URI for.
         :param name: Name of the account.
-        :param appname: The name of the OTP issuer;
-                        this will be the organization title of the OTP entry in Authenticator.
+        :param title: The name of the OTP issuer; this will be the organization title of the OTP entry in Authenticator.
         :param digits: Number of integers in the OTP. Some apps expect this to be 6 digits, others support more.
         :param digest: Digest function to use in the HMAC (expected to be SHA1)
         :param interval: The time interval in seconds for OTP. This defaults to 30.
@@ -1617,9 +1615,9 @@ class UserManager(Generic[TUser]):
             raise ValueError("The 'name' value is None or it could not be set.")
 
         return get_provisioning_uri(
-            secret=base64.b32encode(key.encode()).decode(),
+            secret=key,
             name=name,
-            issuer_name=appname,
+            issuer_name=title,
             digits=digits,
             digest=digest,
             interval=interval,
