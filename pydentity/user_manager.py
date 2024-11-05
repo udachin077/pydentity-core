@@ -48,7 +48,7 @@ from pydentity.interfaces.stores import (
 )
 from pydentity.loggers import user_manager_logger
 from pydentity.resources import Resources
-from pydentity.rfc6238service import get_provisioning_uri
+from pydentity.rfc6238service import get_provisioning_uri, generate_key
 from pydentity.security.claims import ClaimsPrincipal, Claim, ClaimTypes
 from pydentity.types import TUser
 from pydentity.user_login_info import UserLoginInfo
@@ -1503,8 +1503,7 @@ class UserManager(Generic[TUser]):
 
     def generate_new_authenticator_key(self, length: int = 32) -> str:  # noqa
         """Generates a value suitable for use in authenticator."""
-        import pyotp
-        return pyotp.random_base32(length=length)
+        return generate_key(length)
 
     async def generate_new_two_factor_recovery_codes(self, user: TUser, number: int) -> Optional[set[str]]:
         """

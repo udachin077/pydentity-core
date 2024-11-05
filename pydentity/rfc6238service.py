@@ -4,6 +4,7 @@ import pyotp
 
 __all__ = (
     "generate_code",
+    "generate_key",
     "get_provisioning_uri",
     "validate_code",
 )
@@ -71,6 +72,7 @@ class Rfc6238AuthenticationService:
         )
 
 
+generate_key = pyotp.random_base32
 generate_code = Rfc6238AuthenticationService.generate_code
 get_provisioning_uri = Rfc6238AuthenticationService.get_provisioning_uri
 validate_code = Rfc6238AuthenticationService.validate_code
