@@ -34,7 +34,7 @@ class AuthenticatorTokenProvider(IUserTwoFactorTokenProvider[TUser], Generic[TUs
         if is_none_or_empty(key):
             return False
 
-        return validate_code(base64.b32encode(key.encode()).decode(), token, self.digits, self.digest, self.interval)
+        return validate_code(key, token, self.digits, self.digest, self.interval)
 
     @override
     async def can_generate_two_factor(self, manager: "UserManager[TUser]", user: TUser) -> bool:
