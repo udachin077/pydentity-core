@@ -1,9 +1,8 @@
 from datetime import datetime as _datetime, timedelta, UTC
 
-__all__ = (
-    "datetime",
-    "is_none_or_space",
-)
+from typing import cast
+
+__all__ = ("datetime", "is_none_or_space", "ensure_str", "ensure_bytes")
 
 
 class datetime(_datetime):
@@ -36,11 +35,19 @@ class datetime(_datetime):
         return self.add(timedelta(weeks=weeks))
 
 
-def is_none_or_space(value: str | None, /) -> bool:
+def is_none_or_space(v: str | None, /) -> bool:
     """
     Indicates whether a specified string is `None`, `empty`, or consists only of `white-space` characters.
 
-    :param value: The string to test.
+    :param v: The string to test.
     :return: ``True`` if the value parameter is `None` or `empty`, or if value consists exclusively of `white-space` characters.
     """
-    return bool(not value or value.isspace())
+    return bool(not v or v.isspace())
+
+
+def ensure_str(v: str | bytes, *, encoding: str = "utf-8") -> str:
+    return v.decode(encoding) if isinstance(v, bytes) else v
+
+
+def ensure_bytes(v: str | bytes, *, encoding: str = "utf-8") -> bytes:
+    return v.encode(encoding) if isinstance(v, str) else v
