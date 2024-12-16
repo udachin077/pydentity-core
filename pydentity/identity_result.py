@@ -33,12 +33,12 @@ class IdentityResult:
     def failed(cls, *errors: IdentityError) -> Self:
         """Creates an ``IdentityResult`` indicating a failed builders operation,
         with a list of errors if applicable."""
-        return cls(succeeded=False, *errors)
+        return cls(False, *errors)
 
     @classmethod
     def success(cls) -> Self:
         """Returns an ``IdentityResult`` indicating a successful builders operation."""
-        return cls(succeeded=True)
+        return cls(True)
 
     def __str__(self) -> str:
         if self.succeeded:
