@@ -1,17 +1,19 @@
-from typing import Generic, Sequence, TYPE_CHECKING
+from typing import Generic, Sequence, Literal
 
-from pydentity.interfaces import PasswordVerificationResult, IPasswordHasher
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.hashes import HashAlgorithm
+from pwdlib.hashers import HasherProtocol
+
 from pydentity.exc import ArgumentNoneException
+from pydentity.interfaces import PasswordVerificationResult, IPasswordHasher
 from pydentity.types import TUser
 from pydentity.utils import is_none_or_space
-
-if TYPE_CHECKING:
-    from pwdlib.hashers import HasherProtocol
 
 __all__ = (
     "PasswordHasher",
     "BcryptPasswordHasher",
     "Argon2PasswordHasher",
+    "PBKDF2PasswordHasher",
 )
 
 
@@ -20,7 +22,7 @@ class PasswordHasher(IPasswordHasher[TUser], Generic[TUser]):
 
     __slots__ = ("_hasher",)
 
-    def __init__(self, hashers: Sequence["HasherProtocol"]) -> None:
+    def __init__(self, hashers: Sequence[HasherProtocol]) -> None:
         from pwdlib import PasswordHash
 
         self._hasher = PasswordHash(hashers)
@@ -44,14 +46,43 @@ class PasswordHasher(IPasswordHasher[TUser], Generic[TUser]):
 
 
 class BcryptPasswordHasher(PasswordHasher[TUser], Generic[TUser]):
-    def __init__(self) -> None:
-        from pwdlib.hashers.bcrypt import BcryptHasher
+    def __init__(self, rounds: int = 12, prefix: Literal["2a", "2b"] = "2b") -> None:
+        from ._hashers import BcryptHasher
 
-        super().__init__((BcryptHasher(),))
+        super().__init__((BcryptHasher(rounds=rounds, prefix=prefix),))
 
 
 class Argon2PasswordHasher(PasswordHasher[TUser], Generic[TUser]):
-    def __init__(self) -> None:
-        from pwdlib.hashers.argon2 import Argon2Hasher
+    def __init__(
+        self,
+        time_cost: int = 3,
+        memory_cost: int = 65536,
+        parallelism: int = 4,
+        hash_len: int = 32,
+        salt_len: int = 16,
+    ) -> None:
+        from ._hashers import Argon2Hasher
 
-        super().__init__((Argon2Hasher(),))
+        super().__init__(
+            (
+                Argon2Hasher(
+                    time_cost=time_cost,
+                    memory_cost=memory_cost,
+                    parallelism=parallelism,
+                    hash_len=hash_len,
+                    salt_len=salt_len,
+                ),
+            )
+        )
+
+
+class PBKDF2PasswordHasher(PasswordHasher[TUser], Generic[TUser]):
+    def __init__(
+        self,
+        algorithm: HashAlgorithm = hashes.SHA256(),
+        hash_len: int = 32,
+        iterations: int = 720000,
+    ) -> None:
+        from ._hashers import PBKDF2Hasher
+
+        super().__init__((PBKDF2Hasher(algorithm=algorithm, hash_len=hash_len, iterations=iterations),))
