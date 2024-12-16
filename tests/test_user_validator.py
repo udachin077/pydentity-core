@@ -60,7 +60,7 @@ def manager():
     [
         MockUser(id=uuid7().hex, email="manager@email.com", username="manager"),
         MockUser(id=uuid7().hex, email="sysadmin@email.com", username="sysadmin"),
-    ]
+    ],
 )
 async def test_validate(manager, validator, user):
     result = await validator.validate(manager, user)
@@ -73,7 +73,7 @@ async def test_validate(manager, validator, user):
     [
         MockUser(id=uuid7().hex, email="admin@email.com", username="admin"),
         MockUser(id=uuid7().hex, email="user@email.com", username="user"),
-    ]
+    ],
 )
 async def test_validate_fail(manager, validator, user):
     result = await validator.validate(manager, user)
