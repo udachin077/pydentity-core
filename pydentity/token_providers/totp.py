@@ -28,7 +28,7 @@ def _apply_key_modifier(key: bytes | str | UUID, key_modifier: bytes | str | Non
         key = key.bytes
 
     key = ensure_bytes(key)
-    key_modifier = ensure_bytes(key_modifier)
+    key_modifier = ensure_bytes(key_modifier) if key_modifier else None
     return ensure_str(base64.b32encode(key + key_modifier if key_modifier else key))
 
 
