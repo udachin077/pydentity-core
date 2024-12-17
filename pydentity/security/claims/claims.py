@@ -84,7 +84,7 @@ class Claim:
         return Claim(self.type, self.value, self.issuer, self.original_issuer, identity)
 
     def __repr__(self) -> str:
-        return f"<{self.__class__.__name__} {self.type}:{self.value} at {id(self)} object at {id(self)}>"
+        return f"<{self.__class__.__name__} {self.type}:{self.value} object at {hex(id(self))}>"
 
 
 class ClaimsIdentity:
@@ -287,7 +287,7 @@ class ClaimsIdentity:
                 raise NotImplemented
 
     def __repr__(self) -> str:
-        return f"<{self.__class__.__name__} auth:{self.authentication_type} object at {id(self)}>"
+        return f"<{self.__class__.__name__} auth:{self.authentication_type} object at {hex(id(self))}>"
 
 
 class ClaimsPrincipal:

@@ -46,4 +46,4 @@ class IdentityResult:
         return f"Failed: {",".join(e.code for e in self.errors)}."
 
     def __repr__(self) -> str:
-        return f"<{self.__class__.__name__}: {"Succeeded" if self.succeeded else "Failed"} object at {id(self)}>"
+        return f"<{self.__class__.__name__}: {"Succeeded" if self.succeeded else "Failed"} object at {hex(id(self))}>"

@@ -29,4 +29,4 @@ class IdentityError:
         return f"{self.code}: {self.description}"
 
     def __repr__(self) -> str:
-        return f"<{self.__class__.__name__}: {self.code} object at {id(self)}>"
+        return f"<{self.__class__.__name__}: {self.code} object at {hex(id(self))}>"
