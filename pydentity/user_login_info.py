@@ -28,4 +28,4 @@ class UserLoginInfo:
         return self._display_name
 
     def __repr__(self) -> str:
-        return f"<{self.__class__.__name__}: {self.login_provider}:{self.provider_key} object at {id(self)}>"
+        return f"<{self.__class__.__name__}: {self.login_provider}:{self.provider_key} object at {hex(id(self))}>"
