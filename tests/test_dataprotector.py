@@ -1,3 +1,5 @@
+import os
+
 import pytest
 
 from pydentity.dataprotector import DefaultPersonalDataProtector
@@ -24,7 +26,13 @@ def test_fernet(fernet_protector, data):
 
 @pytest.mark.parametrize("data", PERSONAL_DATA)
 def test_fernet_raise(fernet_protector, data):
-    invalid_protector = DefaultPersonalDataProtector("protector")
+    invalid_protector = DefaultPersonalDataProtector(os.urandom(32))
     protected_message = fernet_protector.protect(data)
     with pytest.raises(Exception):
         invalid_protector.unprotect(protected_message)
+
+
+def test_init_protector_raise():
+    with pytest.raises(ValueError):
+        # invalid key length
+        DefaultPersonalDataProtector("protector")
