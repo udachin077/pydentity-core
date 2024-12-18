@@ -301,7 +301,7 @@ class ClaimsPrincipal:
         return tuple(self._identities)
 
     @property
-    def identity(self) -> ClaimsIdentity:
+    def identity(self) -> ClaimsIdentity | None:
         return self.select_primary_identity(self._identities)
 
     @property
@@ -444,15 +444,15 @@ class ClaimsPrincipal:
             case _:
                 raise NotImplemented
 
-    def select_primary_identity(self, identities: Iterable[ClaimsIdentity]) -> ClaimsIdentity:
-        if not identities:
+    def select_primary_identity(self, identities: Iterable[ClaimsIdentity]) -> ClaimsIdentity | None:
+        if identities is None:
             raise ArgumentNoneException("identities")
 
         for identity in identities:
-            if identity.authentication_type:
+            if identity is not None:
                 return identity
 
-        return next(x for x in identities)
+        return None
 
     def add_identities(self, *identities: ClaimsIdentity) -> None:
         """
