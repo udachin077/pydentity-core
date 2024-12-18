@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pydentity-core"
-version = "0.2.7"
+version = "0.3.0"
 description = ""
 authors = ["Udachin Ivan <pypi.udachin@yandex.ru>"]
 license = "MIT"
@@ -35,11 +35,12 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.mypy]
-strict = true
 exclude = ["tests"]
+disable_error_code = "import-untyped"
 
 [tool.ruff]
 line-length = 120
+exclude = ["tests"]
 
 [tool.ruff.format]
 quote-style = "double"

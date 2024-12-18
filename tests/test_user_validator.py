@@ -1,21 +1,28 @@
 import pytest
-from uuid_extensions import uuid7
 
+from conftest import MockUser
 from pydentity.identity_options import IdentityOptions
-from pydentity.types import UserProtokol
 from pydentity.validators import UserValidator
 
-
-class MockUser(UserProtokol):
-    def __init__(self, id, email, username):
-        self.id = id
-        self.email = email
-        self.username = username
-
-
 USERS = [
-    MockUser(id=uuid7().hex, email="admin@email.com", username="admin"),
-    MockUser(id=uuid7().hex, email="user@email.com", username="user"),
+    MockUser(
+        email="alex@email.com",
+        username="alex",
+        normalized_email="alex@email.com",
+        normalized_username="alex",
+    ),
+    MockUser(
+        email="john@email.com",
+        username="john",
+        normalized_email="john@email.com",
+        normalized_username="john",
+    ),
+    MockUser(
+        email="sam@email.com",
+        username="sam",
+        normalized_email="sam@email.com",
+        normalized_username="sam",
+    ),
 ]
 
 
@@ -45,7 +52,7 @@ class MockUserManager:
 
 
 @pytest.fixture(scope="function")
-def validator():
+def user_validator():
     return UserValidator()
 
 
@@ -58,12 +65,22 @@ def manager():
 @pytest.mark.parametrize(
     "user",
     [
-        MockUser(id=uuid7().hex, email="manager@email.com", username="manager"),
-        MockUser(id=uuid7().hex, email="sysadmin@email.com", username="sysadmin"),
+        MockUser(
+            email="anna@email.com",
+            username="anna",
+            normalized_email="anna@email.com",
+            normalized_username="anna"
+        ),
+        MockUser(
+            email="ella@email.com",
+            username="ella",
+            normalized_email="ella@email.com",
+            normalized_username="ella"
+        ),
     ],
 )
-async def test_validate(manager, validator, user):
-    result = await validator.validate(manager, user)
+async def test_validate(manager, user_validator, user):
+    result = await user_validator.validate(manager, user)
     assert result.succeeded == True
 
 
@@ -71,10 +88,20 @@ async def test_validate(manager, validator, user):
 @pytest.mark.parametrize(
     "user",
     [
-        MockUser(id=uuid7().hex, email="admin@email.com", username="admin"),
-        MockUser(id=uuid7().hex, email="user@email.com", username="user"),
+        MockUser(
+            email="alex@email.com",
+            username="alex",
+            normalized_email="alex@email.com",
+            normalized_username="alex",
+        ),
+        MockUser(
+            email="john@email.com",
+            username="john",
+            normalized_email="john@email.com",
+            normalized_username="john",
+        ),
     ],
 )
-async def test_validate_fail(manager, validator, user):
-    result = await validator.validate(manager, user)
+async def test_validate_fail(manager, user_validator, user):
+    result = await user_validator.validate(manager, user)
     assert result.succeeded == False

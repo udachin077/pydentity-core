@@ -31,26 +31,11 @@ def principal(identity):
 @pytest.mark.parametrize(
     "_match,expected",
     [
-        (
-            ClaimTypes.Role,
-            2,
-        ),
-        (
-            ClaimTypes.Name,
-            1,
-        ),
-        (
-            ClaimTypes.AuthenticationMethod,
-            0,
-        ),
-        (
-            lambda c: bool(c and c.type == ClaimTypes.Name),
-            1,
-        ),
-        (
-            lambda c: bool(c and c.type == ClaimTypes.AuthenticationMethod),
-            0,
-        ),
+        (ClaimTypes.Role, 2,),
+        (ClaimTypes.Name, 1,),
+        (ClaimTypes.AuthenticationMethod, 0,),
+        (lambda c: bool(c and c.type == ClaimTypes.Name), 1,),
+        (lambda c: bool(c and c.type == ClaimTypes.AuthenticationMethod), 0,),
     ],
 )
 def test_claims_identity_find_all(identity, _match, expected):
@@ -60,26 +45,11 @@ def test_claims_identity_find_all(identity, _match, expected):
 @pytest.mark.parametrize(
     "_match,expected",
     [
-        (
-            ClaimTypes.Role,
-            True,
-        ),
-        (
-            ClaimTypes.Name,
-            True,
-        ),
-        (
-            ClaimTypes.AuthenticationMethod,
-            False,
-        ),
-        (
-            lambda c: bool(c and c.type == ClaimTypes.Name),
-            True,
-        ),
-        (
-            lambda c: bool(c and c.type == ClaimTypes.AuthenticationMethod),
-            False,
-        ),
+        (ClaimTypes.Role, True,),
+        (ClaimTypes.Name, True,),
+        (ClaimTypes.AuthenticationMethod, False,),
+        (lambda c: bool(c and c.type == ClaimTypes.Name), True,),
+        (lambda c: bool(c and c.type == ClaimTypes.AuthenticationMethod), False,),
     ],
 )
 def test_claims_identity_find_first(identity, _match, expected):
@@ -89,29 +59,11 @@ def test_claims_identity_find_first(identity, _match, expected):
 @pytest.mark.parametrize(
     "_match,expected",
     [
-        (
-            ClaimTypes.Role,
-            (
-                "role1",
-                "role2",
-            ),
-        ),
-        (
-            ClaimTypes.Name,
-            ("john_username",),
-        ),
-        (
-            ClaimTypes.AuthenticationMethod,
-            (None,),
-        ),
-        (
-            lambda c: bool(c and c.type == ClaimTypes.Name),
-            ("john_username",),
-        ),
-        (
-            lambda c: bool(c and c.type == ClaimTypes.AuthenticationMethod),
-            (None,),
-        ),
+        (ClaimTypes.Role, ("role1", "role2",),),
+        (ClaimTypes.Name, ("john_username",),),
+        (ClaimTypes.AuthenticationMethod, (None,),),
+        (lambda c: bool(c and c.type == ClaimTypes.Name), ("john_username",),),
+        (lambda c: bool(c and c.type == ClaimTypes.AuthenticationMethod), (None,),),
     ],
 )
 def test_claims_identity_find_first(identity, _match, expected):
@@ -121,32 +73,11 @@ def test_claims_identity_find_first(identity, _match, expected):
 @pytest.mark.parametrize(
     "_match,expected",
     [
-        (
-            (
-                ClaimTypes.Role,
-                "role1",
-            ),
-            True,
-        ),
-        (
-            (
-                ClaimTypes.Name,
-                "john_username",
-            ),
-            True,
-        ),
-        (
-            (ClaimTypes.AuthenticationMethod, "amr"),
-            False,
-        ),
-        (
-            (lambda c: bool(c and c.type == ClaimTypes.Name),),
-            True,
-        ),
-        (
-            (lambda c: bool(c and c.type == ClaimTypes.AuthenticationMethod),),
-            False,
-        ),
+        ((ClaimTypes.Role, "role1",), True,),
+        ((ClaimTypes.Name, "john_username",), True,),
+        ((ClaimTypes.AuthenticationMethod, "amr"), False,),
+        ((lambda c: bool(c and c.type == ClaimTypes.Name),), True,),
+        ((lambda c: bool(c and c.type == ClaimTypes.AuthenticationMethod),), False,),
     ],
 )
 def test_claims_identity_find_first(identity, _match, expected):
@@ -156,26 +87,11 @@ def test_claims_identity_find_first(identity, _match, expected):
 @pytest.mark.parametrize(
     "_match,expected",
     [
-        (
-            ClaimTypes.Role,
-            2,
-        ),
-        (
-            ClaimTypes.Name,
-            1,
-        ),
-        (
-            ClaimTypes.AuthenticationMethod,
-            0,
-        ),
-        (
-            lambda c: bool(c and c.type == ClaimTypes.Name),
-            1,
-        ),
-        (
-            lambda c: bool(c and c.type == ClaimTypes.AuthenticationMethod),
-            0,
-        ),
+        (ClaimTypes.Role, 2,),
+        (ClaimTypes.Name, 1,),
+        (ClaimTypes.AuthenticationMethod, 0,),
+        (lambda c: bool(c and c.type == ClaimTypes.Name), 1,),
+        (lambda c: bool(c and c.type == ClaimTypes.AuthenticationMethod), 0,),
     ],
 )
 def test_claims_principal_find_all(principal, _match, expected):
@@ -185,26 +101,11 @@ def test_claims_principal_find_all(principal, _match, expected):
 @pytest.mark.parametrize(
     "_match,expected",
     [
-        (
-            ClaimTypes.Role,
-            True,
-        ),
-        (
-            ClaimTypes.Name,
-            True,
-        ),
-        (
-            ClaimTypes.AuthenticationMethod,
-            False,
-        ),
-        (
-            lambda c: bool(c and c.type == ClaimTypes.Name),
-            True,
-        ),
-        (
-            lambda c: bool(c and c.type == ClaimTypes.AuthenticationMethod),
-            False,
-        ),
+        (ClaimTypes.Role, True,),
+        (ClaimTypes.Name, True,),
+        (ClaimTypes.AuthenticationMethod, False,),
+        (lambda c: bool(c and c.type == ClaimTypes.Name), True,),
+        (lambda c: bool(c and c.type == ClaimTypes.AuthenticationMethod), False,),
     ],
 )
 def test_claims_principal_find_first(principal, _match, expected):
@@ -214,29 +115,11 @@ def test_claims_principal_find_first(principal, _match, expected):
 @pytest.mark.parametrize(
     "_match,expected",
     [
-        (
-            ClaimTypes.Role,
-            (
-                "role1",
-                "role2",
-            ),
-        ),
-        (
-            ClaimTypes.Name,
-            ("john_username",),
-        ),
-        (
-            ClaimTypes.AuthenticationMethod,
-            (None,),
-        ),
-        (
-            lambda c: bool(c and c.type == ClaimTypes.Name),
-            ("john_username",),
-        ),
-        (
-            lambda c: bool(c and c.type == ClaimTypes.AuthenticationMethod),
-            (None,),
-        ),
+        (ClaimTypes.Role, ("role1", "role2",),),
+        (ClaimTypes.Name, ("john_username",),),
+        (ClaimTypes.AuthenticationMethod, (None,),),
+        (lambda c: bool(c and c.type == ClaimTypes.Name), ("john_username",),),
+        (lambda c: bool(c and c.type == ClaimTypes.AuthenticationMethod), (None,),),
     ],
 )
 def test_claims_principal_find_first(principal, _match, expected):
@@ -246,32 +129,11 @@ def test_claims_principal_find_first(principal, _match, expected):
 @pytest.mark.parametrize(
     "_match,expected",
     [
-        (
-            (
-                "age",
-                22,
-            ),
-            True,
-        ),
-        (
-            (
-                ClaimTypes.Locality,
-                "London",
-            ),
-            True,
-        ),
-        (
-            (ClaimTypes.AuthenticationMethod, "amr"),
-            False,
-        ),
-        (
-            (lambda c: bool(c and c.type == ClaimTypes.Name),),
-            True,
-        ),
-        (
-            (lambda c: bool(c and c.type == ClaimTypes.AuthenticationMethod),),
-            False,
-        ),
+        (("age", 22,), True,),
+        ((ClaimTypes.Locality, "London",), True,),
+        ((ClaimTypes.AuthenticationMethod, "amr"), False,),
+        ((lambda c: bool(c and c.type == ClaimTypes.Name),), True,),
+        ((lambda c: bool(c and c.type == ClaimTypes.AuthenticationMethod),), False,),
     ],
 )
 def test_claims_principal_find_first(principal, _match, expected):
@@ -281,18 +143,9 @@ def test_claims_principal_find_first(principal, _match, expected):
 @pytest.mark.parametrize(
     "_match,expected",
     [
-        (
-            "role1",
-            True,
-        ),
-        (
-            "role2",
-            True,
-        ),
-        (
-            "admin",
-            False,
-        ),
+        ("role1", True,),
+        ("role2", True,),
+        ("admin", False,),
     ],
 )
 def test_claims_principal_is_in_role(principal, _match, expected):
@@ -302,30 +155,9 @@ def test_claims_principal_is_in_role(principal, _match, expected):
 @pytest.mark.parametrize(
     "_match,expected_any,expected_all",
     [
-        (
-            (
-                "role1",
-                "role2",
-            ),
-            True,
-            True,
-        ),
-        (
-            (
-                "admin",
-                "role2",
-            ),
-            True,
-            False,
-        ),
-        (
-            (
-                "admin",
-                "manager",
-            ),
-            False,
-            False,
-        ),
+        (("role1", "role2",), True, True,),
+        (("admin", "role2",), True, False,),
+        (("admin", "manager",), False, False,),
     ],
 )
 def test_claims_principal_is_in_roles(principal, _match, expected_any, expected_all):

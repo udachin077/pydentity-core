@@ -1,19 +1,11 @@
 import pytest
-from uuid_extensions import uuid7
 
-from pydentity.types import RoleProtokol
+from conftest import MockRole
 from pydentity.validators import RoleValidator
 
-
-class MockRole(RoleProtokol):
-    def __init__(self, id, name):
-        self.id = id
-        self.name = name
-
-
 ROLES = [
-    MockRole(id=uuid7().hex, name="admin"),
-    MockRole(id=uuid7().hex, name="user"),
+    MockRole(name="admin", normalized_name="admin"),
+    MockRole(name="user", normalized_name="user"),
 ]
 
 
@@ -32,7 +24,7 @@ class MockRoleManager:
 
 
 @pytest.fixture(scope="function")
-def validator() -> RoleValidator:
+def role_validator():
     return RoleValidator()
 
 
@@ -42,14 +34,14 @@ def manager():
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("role", [MockRole(id=uuid7().hex, name="manager"), MockRole(id=uuid7().hex, name="sysadmin")])
-async def test_validate(manager, validator, role):
-    result = await validator.validate(manager, role)
-    assert result.succeeded == True
+@pytest.mark.parametrize("role", [MockRole(name="manager"), MockRole(name="sysadmin"), *ROLES])
+async def test_validate(manager, role_validator, role):
+    result = await role_validator.validate(manager, role)
+    assert result.succeeded is True
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("role", [MockRole(id=uuid7().hex, name="admin"), MockRole(id=uuid7().hex, name="user")])
-async def test_validate_fail(manager, validator, role):
-    result = await validator.validate(manager, role)
-    assert result.succeeded == False
+@pytest.mark.parametrize("role", [MockRole(name="admin"), MockRole(name="user")])
+async def test_validate_fail(manager, role_validator, role):
+    result = await role_validator.validate(manager, role)
+    assert result.succeeded is False
