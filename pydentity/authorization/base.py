@@ -1,7 +1,7 @@
 from collections.abc import Iterable, Callable, Awaitable
 from functools import lru_cache
 from inspect import isfunction
-from typing import Literal, Any, overload
+from typing import Literal, Any, overload, Generic
 
 from pydentity.authorization.interfaces import (
     IAuthorizationPolicyProvider,
@@ -28,7 +28,7 @@ class AuthorizationError(Exception):
     pass
 
 
-class AuthorizationHandlerContext:
+class AuthorizationHandlerContext(Generic[TRequest]):
     __slots__ = (
         "_request",
         "_fail_called",

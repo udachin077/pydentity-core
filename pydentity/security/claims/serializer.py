@@ -57,13 +57,7 @@ def principal_dumps(principal: ClaimsPrincipal) -> str | None:
         for claim in identity.claims:
             result[key].append(claim_to_dict(claim))
 
-    return json.dumps(
-        result,
-        separators=(
-            ",",
-            ":",
-        ),
-    )
+    return json.dumps(result, separators=(",", ":"))
 
 
 def principal_loads(data: str | bytes | bytearray) -> ClaimsPrincipal | None:

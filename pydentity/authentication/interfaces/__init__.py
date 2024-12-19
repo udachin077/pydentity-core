@@ -3,10 +3,11 @@ from collections.abc import Iterable
 from typing import TYPE_CHECKING, Optional, Any
 
 from pydentity.security.claims import ClaimsPrincipal
+from pydentity.types import TRequest, TResponse
 
 if TYPE_CHECKING:
     from pydentity.http.context import HttpContext
-    from pydentity.authentication._base import (
+    from pydentity.authentication.base import (
         AuthenticationResult,
         AuthenticationScheme,
         AuthenticationOptions,
@@ -17,7 +18,7 @@ class IAuthenticationHandler(ABC):
     """Used to provide authentication."""
 
     @abstractmethod
-    async def authenticate(self, context: "HttpContext", scheme: str) -> "AuthenticationResult":
+    async def authenticate(self, context: "HttpContext[TRequest, TResponse]", scheme: str) -> "AuthenticationResult":
         """
         Authenticate for the specified authentication scheme.
 
@@ -27,7 +28,9 @@ class IAuthenticationHandler(ABC):
         """
 
     @abstractmethod
-    async def sign_in(self, context: "HttpContext", scheme: str, principal: ClaimsPrincipal, **properties: Any) -> None:
+    async def sign_in(
+        self, context: "HttpContext[TRequest, TResponse]", scheme: str, principal: ClaimsPrincipal, **properties: Any
+    ) -> None:
         """
         Sign a principal in for the specified authentication scheme.
 
@@ -39,7 +42,7 @@ class IAuthenticationHandler(ABC):
         """
 
     @abstractmethod
-    async def sign_out(self, context: "HttpContext", scheme: str) -> None:
+    async def sign_out(self, context: "HttpContext[TRequest, TResponse]", scheme: str) -> None:
         """
         Sign out the specified authentication scheme.
 

@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
-    from pydentity.authorization._base import (
+    from pydentity.authorization.base import (
         AuthorizationPolicy,
         AuthorizationHandlerContext,
         AuthorizationOptions,

@@ -1,4 +1,4 @@
-from pydentity.authorization._base import (
+from pydentity.authorization.base import (
     AuthorizationError as AuthorizationError,
     AuthorizationHandlerContext as AuthorizationHandlerContext,
     AuthorizationOptions as AuthorizationOptions,

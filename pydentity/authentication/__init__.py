@@ -1,4 +1,4 @@
-from pydentity.authentication._base import (
+from pydentity.authentication.base import (
     AuthenticationError as AuthenticationError,
     AuthenticationOptions as AuthenticationOptions,
     AuthenticationResult as AuthenticationResult,
