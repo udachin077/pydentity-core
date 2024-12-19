@@ -72,15 +72,15 @@ class HttpContext(Generic[TRequest, TResponse]):
 
 
 class IHttpContextAccessor(Generic[TRequest, TResponse], ABC):
+    context_class: type[HttpContext[TRequest, TResponse]] = HttpContext[TRequest, TResponse]
     response_class: TResponse
-    context_class: type[HttpContext[TRequest, TResponse]]
 
-    __slots__ = ("_http_context",)
+    __slots__ = ("__http_context",)
 
     def __init__(self, request: TRequest, schemes: IAuthenticationSchemeProvider) -> None:
-        self._http_context = self.context_class(request, self.response_class(None, status_code=204), schemes)  # type: ignore
+        self.__http_context = self.context_class(request, self.response_class(None, status_code=204), schemes)  # type: ignore
 
     @property
     def http_context(self) -> HttpContext:
         """Gets or sets the current ``HttpContext``. Returns None if there is no active ``HttpContext``."""
-        return self._http_context
+        return self.__http_context
