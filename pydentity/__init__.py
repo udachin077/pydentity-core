@@ -9,7 +9,8 @@ from pydentity.lookup_normalizer import (
     LowerLookupNormalizer as LowerLookupNormalizer,
 )
 from pydentity.role_manager import RoleManager as RoleManager
-from pydentity.signin_manager import SignInManager as SignInManager, SignInResult as SignInResult
+from pydentity.signin_manager import SignInManager as SignInManager
+from pydentity.signin_result import SignInResult as SignInResult
 from pydentity.user_claims_principal_factory import UserClaimsPrincipalFactory as UserClaimsPrincipalFactory
 from pydentity.user_confirmation import DefaultUserConfirmation as DefaultUserConfirmation
 from pydentity.user_login_info import UserLoginInfo as UserLoginInfo
