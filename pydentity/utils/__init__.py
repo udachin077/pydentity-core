@@ -1,8 +1,16 @@
+import base64
 from datetime import datetime as _datetime, timedelta, UTC
 
-from typing import cast
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
-__all__ = ("datetime", "is_none_or_space", "ensure_str", "ensure_bytes")
+__all__ = (
+    "datetime",
+    "is_none_or_space",
+    "ensure_str",
+    "ensure_bytes",
+    "generate_security_key",
+)
 
 
 class datetime(_datetime):
@@ -51,3 +59,18 @@ def ensure_str(v: str | bytes, *, encoding: str = "utf-8") -> str:
 
 def ensure_bytes(v: str | bytes, *, encoding: str = "utf-8") -> bytes:
     return v.encode(encoding) if isinstance(v, str) else v
+
+
+def generate_security_key(cls) -> bytes:
+    try:
+        import machineid
+    except ImportError:
+        raise RuntimeError(
+            'The installed "py-machineid" package is required to generate salt.\n'
+            'You can install "py-machineid" with:\npip install py-machineid'
+        )
+
+    key = ensure_bytes(machineid.hashed_id("pydentity.protector"))
+    salt = ensure_bytes(cls.__name__)
+    pbkdf2 = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=salt, iterations=480000)
+    return base64.urlsafe_b64encode(pbkdf2.derive(key))
