@@ -3,6 +3,7 @@ from collections.abc import Iterable
 from datetime import timedelta
 from typing import Final
 
+from pydentity._meta import SingletonMeta  # noqa
 from pydentity.interfaces import IUserTwoFactorTokenProvider
 from pydentity.security.claims import ClaimTypes
 from pydentity.types import TUser
@@ -18,7 +19,7 @@ __all__ = (
 )
 
 
-class LockoutOptions:
+class LockoutOptions(metaclass=SingletonMeta):
     """Options for configuring user lockout."""
 
     __slots__ = (

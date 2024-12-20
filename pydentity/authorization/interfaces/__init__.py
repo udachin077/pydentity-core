@@ -5,25 +5,7 @@ if TYPE_CHECKING:
     from pydentity.authorization.base import (
         AuthorizationPolicy,
         AuthorizationHandlerContext,
-        AuthorizationOptions,
     )
-
-
-class IAuthorizationPolicyProvider(ABC):
-    """A type which can provide ``AuthorizationPolicy`` for a particular name."""
-
-    @abstractmethod
-    async def get_policy(self, name: str) -> Optional["AuthorizationPolicy"]:
-        """
-        Gets a ``AuthorizationPolicy`` from the given policy name.
-
-        :param name: The policy name to retrieve.
-        :return:
-        """
-
-    @abstractmethod
-    async def get_default_policy(self) -> Optional["AuthorizationPolicy"]:
-        """Gets the default authorization policy."""
 
 
 class IAuthorizationHandler(ABC):
@@ -39,10 +21,18 @@ class IAuthorizationHandler(ABC):
         """
 
 
-class IAuthorizationOptionsAccessor(ABC):
-    def __init__(self, options: "AuthorizationOptions"):
-        self.__options = options
+class IAuthorizationPolicyProvider:
+    """A type which can provide ``AuthorizationPolicy`` for a particular name."""
 
-    @property
-    def value(self) -> "AuthorizationOptions":
-        return self.__options
+    @abstractmethod
+    async def get_policy(self, name: str) -> Optional["AuthorizationPolicy"]:
+        """
+        Gets a ``AuthorizationPolicy`` from the given policy name.
+
+        :param name: The policy name to retrieve.
+        :return:
+        """
+
+    @abstractmethod
+    async def get_default_policy(self) -> Optional["AuthorizationPolicy"]:
+        """Gets the default authorization policy."""

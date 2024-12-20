@@ -1,19 +1,16 @@
 import base64
-import platform
 from collections.abc import Iterable
 from functools import lru_cache
 from inspect import isfunction
 from typing import overload, Any, Callable
 
 from cryptography.fernet import Fernet
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
+from pydentity._meta import SingletonMeta  # noqa
 from pydentity.authentication.interfaces import (
     IAuthenticationDataProtector,
     IAuthenticationHandler,
     IAuthenticationSchemeProvider,
-    IAuthenticationOptionsAccessor,
 )
 from pydentity.exc import ArgumentNoneException, InvalidOperationException
 from pydentity.security.claims import ClaimsPrincipal
@@ -27,6 +24,8 @@ __all__ = (
     "AuthenticationSchemeProvider",
     "DefaultAuthenticationDataProtector",
 )
+
+from pydentity.utils import ensure_bytes, ensure_str, generate_security_key
 
 
 class AuthenticationError(Exception):
@@ -139,7 +138,7 @@ class AuthenticationSchemeBuilder:
         return AuthenticationScheme(self.name, self.handler, self.display_name)
 
 
-class AuthenticationOptions:
+class AuthenticationOptions(metaclass=SingletonMeta):
     __slots__ = (
         "__scheme_map",
         "default_scheme",
@@ -213,17 +212,13 @@ class AuthenticationOptions:
             raise NotImplementedError
 
 
-class AuthenticationSchemeProvider(IAuthenticationSchemeProvider):
+class AuthenticationSchemeProvider(IAuthenticationSchemeProvider, metaclass=SingletonMeta):
     """Implements ``IAuthenticationSchemeProvider``."""
 
-    __slots__ = (
-        "_options",
-        "_auto_default_scheme",
-    )
+    __slots__ = ("_options",)
 
-    def __init__(self, options: IAuthenticationOptionsAccessor) -> None:
-        self._options = options.value
-        self._auto_default_scheme = next(s for s in self._options.scheme_map.values())
+    def __init__(self) -> None:
+        self._options = AuthenticationOptions()
 
     @lru_cache
     async def get_all_schemes(self) -> Iterable[AuthenticationScheme]:
@@ -257,40 +252,25 @@ class AuthenticationSchemeProvider(IAuthenticationSchemeProvider):
     async def get_default_scheme(self) -> AuthenticationScheme | None:
         if name := self._options.default_scheme:
             return await self.get_scheme(name)
-        return self._auto_default_scheme
+        return next(s for s in self._options.scheme_map.values())
 
 
 class DefaultAuthenticationDataProtector(IAuthenticationDataProtector):
     __slots__ = ("_fernet",)
 
-    def __init__(self, key: str | bytes | None = None, salt: str | bytes | None = None) -> None:
-        key, salt = self._get_key_and_salt(key, salt)
-        self._fernet = Fernet(key)
-
-    def _get_key_and_salt(self, key: str | bytes | None = None, salt: str | bytes | None = None) -> tuple[bytes, bytes]:
-        key = key or platform.node().encode()
-        salt = salt or self.__class__.__name__.encode()
-
-        if isinstance(key, str):
-            key = key.encode()
-
-        if isinstance(salt, str):
-            salt = salt.encode()
-
-        kdf = PBKDF2HMAC(hashes.SHA256(), 32, salt, 480000)
-        return base64.urlsafe_b64encode(kdf.derive(key)), salt
+    def __init__(
+        self,
+        key: bytes | str | None = None,
+    ) -> None:
+        _key = base64.urlsafe_b64encode(ensure_bytes(key)) if key else generate_security_key(self.__class__)
+        self._fernet = Fernet(_key)
 
     def protect(self, plain_text: str | bytes) -> str | None:
         if plain_text is None:
             return plain_text
-
-        if isinstance(plain_text, str):
-            plain_text = plain_text.encode()
-
-        return self._fernet.encrypt(plain_text).decode()
+        encrypted_data = self._fernet.encrypt(ensure_bytes(plain_text))
+        return ensure_str(base64.urlsafe_b64encode(encrypted_data))
 
     def unprotect(self, protected_data: str | bytes) -> str | None:
-        if protected_data is None:
-            return protected_data
-
-        return self._fernet.decrypt(protected_data).decode()
+        decrypted_data = self._fernet.decrypt(base64.urlsafe_b64decode(protected_data))
+        return ensure_str(decrypted_data)

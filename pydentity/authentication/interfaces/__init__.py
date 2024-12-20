@@ -10,7 +10,6 @@ if TYPE_CHECKING:
     from pydentity.authentication.base import (
         AuthenticationResult,
         AuthenticationScheme,
-        AuthenticationOptions,
     )
 
 
@@ -52,7 +51,7 @@ class IAuthenticationHandler(ABC):
         """
 
 
-class IAuthenticationSchemeProvider(ABC):
+class IAuthenticationSchemeProvider:
     """Responsible for managing what authenticationSchemes are supported."""
 
     @abstractmethod
@@ -119,12 +118,3 @@ class IAuthenticationDataProtector(ABC):
         :param protected_data: The protected data to unprotect.
         :return:
         """
-
-
-class IAuthenticationOptionsAccessor(ABC):
-    def __init__(self, options: "AuthenticationOptions"):
-        self.__options = options
-
-    @property
-    def value(self) -> "AuthenticationOptions":
-        return self.__options

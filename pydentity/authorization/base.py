@@ -1,12 +1,12 @@
 from collections.abc import Iterable, Callable, Awaitable
 from functools import lru_cache
 from inspect import isfunction
-from typing import Literal, Any, overload, Generic
+from typing import Literal, Any, overload, Generic, Self
 
+from pydentity._meta import SingletonMeta  # noqa
 from pydentity.authorization.interfaces import (
     IAuthorizationPolicyProvider,
     IAuthorizationHandler,
-    IAuthorizationOptionsAccessor,
 )
 from pydentity.exc import ArgumentNoneException, InvalidOperationException
 from pydentity.security.claims import ClaimsPrincipal, Claim
@@ -285,7 +285,7 @@ class AuthorizationPolicyBuilder:
         self.name = name
         self._requirements: list[IAuthorizationHandler] = []
 
-    def add_requirements(self, *requirements: IAuthorizationHandler) -> "AuthorizationPolicyBuilder":
+    def add_requirements(self, *requirements: IAuthorizationHandler) -> Self:
         """
         Adds the specified requirements to the for this instance.
 
@@ -298,7 +298,7 @@ class AuthorizationPolicyBuilder:
         self._requirements.extend(requirements)
         return self
 
-    def require_claim(self, claim_type: str, *allowed_values: Any) -> "AuthorizationPolicyBuilder":
+    def require_claim(self, claim_type: str, *allowed_values: Any) -> Self:
         """
         Adds ``ClaimsAuthorizationRequirement`` to the current instance which requires that the current user
         has the specified claim and that the claim value must be one of the allowed values.
@@ -311,7 +311,7 @@ class AuthorizationPolicyBuilder:
         self._requirements.append(ClaimsAuthorizationRequirement(claim_type, *allowed_values))
         return self
 
-    def require_role(self, *roles: str) -> "AuthorizationPolicyBuilder":
+    def require_role(self, *roles: str) -> Self:
         """
         Adds a ``RolesAuthorizationRequirement`` to the current instance which enforces that the current user
         must have at least one of the specified roles.
@@ -322,7 +322,7 @@ class AuthorizationPolicyBuilder:
         self._requirements.append(RolesAuthorizationRequirement(*roles, mode="any"))
         return self
 
-    def require_roles(self, *roles: str) -> "AuthorizationPolicyBuilder":
+    def require_roles(self, *roles: str) -> Self:
         """
         Adds a ``RolesAuthorizationRequirement`` to the current instance which enforces that the current user
         must have at all the specified roles.
@@ -333,7 +333,7 @@ class AuthorizationPolicyBuilder:
         self._requirements.append(RolesAuthorizationRequirement(*roles, mode="all"))
         return self
 
-    def require_username(self, name: str) -> "AuthorizationPolicyBuilder":
+    def require_username(self, name: str) -> Self:
         """
         Adds a ``NameAuthorizationRequirement`` to the current instance which enforces that the current user
         matches the specified name.
@@ -344,7 +344,7 @@ class AuthorizationPolicyBuilder:
         self._requirements.append(NameAuthorizationRequirement(name))
         return self
 
-    def require_assertion(self, handler: _HandlerType) -> "AuthorizationPolicyBuilder":
+    def require_assertion(self, handler: _HandlerType) -> Self:
         """
         Adds an ``AssertionRequirement`` to the current instance.
 
@@ -354,7 +354,7 @@ class AuthorizationPolicyBuilder:
         self._requirements.append(AssertionRequirement(handler))
         return self
 
-    def require_authenticated_user(self) -> "AuthorizationPolicyBuilder":
+    def require_authenticated_user(self) -> Self:
         """
         Adds ``DenyAnonymousAuthorizationRequirement`` to the current instance which enforces that the current user
         is authenticated.
@@ -373,7 +373,7 @@ class AuthorizationPolicyBuilder:
         return AuthorizationPolicy(self.name, self._requirements)
 
 
-class AuthorizationOptions:
+class AuthorizationOptions(metaclass=SingletonMeta):
     """Provides programmatic configuration used by ``IAuthorizationService`` and ``IAuthorizationPolicyProvider``."""
 
     __slots__ = (
@@ -447,15 +447,15 @@ class AuthorizationOptions:
         return self.__policy_map.get(name)
 
 
-class AuthorizationPolicyProvider(IAuthorizationPolicyProvider):
+class AuthorizationPolicyProvider(IAuthorizationPolicyProvider, metaclass=SingletonMeta):
     """
     The default implementation of a policy provider, which provides a ``AuthorizationPolicy`` for a particular name.
     """
 
     __slots__ = ("_options",)
 
-    def __init__(self, options: IAuthorizationOptionsAccessor):
-        self._options = options.value
+    def __init__(self):
+        self._options = AuthorizationOptions()
 
     @lru_cache
     async def get_policy(self, name: str) -> AuthorizationPolicy | None:
