@@ -21,7 +21,7 @@ __all__ = (
     "JWTSecurityToken",
     "JWTBearerAuthenticationHandler",
     "TokenValidationParameters",
-    "ITokenClaimsSerializer",
+    "IPrincipalClaimsSerializer",
 )
 
 KeyType = RSAPrivateKey | EllipticCurvePrivateKey | Ed25519PrivateKey | Ed448PrivateKey | str | bytes
@@ -29,7 +29,7 @@ KeyType = RSAPrivateKey | EllipticCurvePrivateKey | Ed25519PrivateKey | Ed448Pri
 STANDARD_CLAIM = ("aud", "exp", "iat", "iss", "jti", "nbf", "sub")
 
 
-class ITokenClaimsSerializer(ABC):
+class IPrincipalClaimsSerializer(ABC):
     @abstractmethod
     def dumps(self, claims: list[Claim]) -> dict[str, Any]:
         pass
@@ -39,7 +39,7 @@ class ITokenClaimsSerializer(ABC):
         pass
 
 
-class DefaultTokenClaimSerializer(ITokenClaimsSerializer):
+class DefaultPrincipalClaimSerializer(IPrincipalClaimsSerializer):
     def dumps(self, claims: list[Claim]) -> dict[str, Any]:
         _claims = defaultdict(list)
         for claim in claims:
@@ -55,21 +55,21 @@ class DefaultTokenClaimSerializer(ITokenClaimsSerializer):
 
 
 class JWTSecurityToken(dict[str, Any]):
-    claims_serializer: ITokenClaimsSerializer = DefaultTokenClaimSerializer()
+    serializer: IPrincipalClaimsSerializer = DefaultPrincipalClaimSerializer()
 
     def __init__(
-            self,
-            signin_key: KeyType,
-            algorithm: str = "HS256",
-            audience: str | None = None,
-            claims: Iterable[Claim] | None = None,
-            expires: datetime | int | None = None,
-            headers: dict[str, Any] | None = None,
-            issuer: str | None = None,
-            issuer_at: datetime | int | None = None,
-            not_before: datetime | int | None = None,
-            subject: str | None = None,
-            **kwargs: Any,
+        self,
+        signin_key: KeyType,
+        algorithm: str = "HS256",
+        audience: str | None = None,
+        claims: Iterable[Claim] | None = None,
+        expires: datetime | int | None = None,
+        headers: dict[str, Any] | None = None,
+        issuer: str | None = None,
+        issuer_at: datetime | int | None = None,
+        not_before: datetime | int | None = None,
+        subject: str | None = None,
+        **kwargs: Any,
     ) -> None:
         super().__init__(kwargs)
         self._signing_key = signin_key
@@ -144,19 +144,19 @@ class JWTSecurityToken(dict[str, Any]):
         if not self._signing_key:
             raise InvalidKeyError()
 
-        self.update(self.claims_serializer.dumps(self.claims))
+        self.update(self.serializer.dumps(self.claims))
         return jwt.encode(self, self._signing_key, self.algorithm, self.headers)
 
     @classmethod
     def decode(
-            cls,
-            token: str | bytes,
-            key: KeyType,
-            algorithms: list[str] | None = None,
-            options: dict[str, Any] | None = None,
-            audience: str | Iterable[str] | None = None,
-            issuer: str | list[str] | None = None,
-            leeway: float | timedelta = 0,
+        cls,
+        token: str | bytes,
+        key: KeyType,
+        algorithms: list[str] | None = None,
+        options: dict[str, Any] | None = None,
+        audience: str | Iterable[str] | None = None,
+        issuer: str | list[str] | None = None,
+        leeway: float | timedelta = 0,
     ) -> "JWTSecurityToken":
         payload = jwt.decode(
             token,
@@ -167,9 +167,7 @@ class JWTSecurityToken(dict[str, Any]):
             options=options,
             leeway=leeway,
         )
-        return JWTSecurityToken(
-            signin_key=key, claims=[*cls.claims_serializer.loads(payload)] or None, **payload
-        )
+        return JWTSecurityToken(signin_key=key, claims=[*cls.serializer.loads(payload)] or None, **payload)
 
 
 class TokenValidationParameters:
@@ -185,13 +183,13 @@ class TokenValidationParameters:
     )
 
     def __init__(
-            self,
-            issuer_signing_key: KeyType,
-            valid_algorithms: list[str] | None = None,
-            valid_audiences: str | Iterable[str] | None = None,
-            valid_issuers: str | list[str] | None = None,
-            options: dict[str, Any] | None = None,
-            leeway: float | timedelta = 0,
+        self,
+        issuer_signing_key: KeyType,
+        valid_algorithms: list[str] | None = None,
+        valid_audiences: str | Iterable[str] | None = None,
+        valid_issuers: str | list[str] | None = None,
+        options: dict[str, Any] | None = None,
+        leeway: float | timedelta = 0,
     ) -> None:
         self.issuer_signing_key = issuer_signing_key
         self.valid_algorithms = valid_algorithms or ["HS256"]
@@ -243,7 +241,7 @@ class JWTBearerAuthenticationHandler(IAuthenticationHandler):
             return AuthenticationResult(ClaimsPrincipal(), {})
 
     async def sign_in(
-            self, context: HttpContext[TRequest, TResponse], scheme: str, principal: ClaimsPrincipal, **properties: Any
+        self, context: HttpContext[TRequest, TResponse], scheme: str, principal: ClaimsPrincipal, **properties: Any
     ) -> None:
         pass
 
