@@ -1,4 +1,4 @@
-from abc import abstractmethod, ABC
+from abc import ABC
 from functools import lru_cache
 from typing import Any, Generic
 
@@ -37,20 +37,12 @@ class HttpContext(Generic[TRequest, TResponse]):
     @property
     def user(self) -> ClaimsPrincipal | None:
         """Gets the user for this request."""
-        return self._user_getter()
+        return self.request.user
 
     @user.setter
     def user(self, value: ClaimsPrincipal | None) -> None:
         """Sets the user for this request."""
-        self._user_setter(value)
-
-    @abstractmethod
-    def _user_getter(self) -> ClaimsPrincipal | None:
-        pass
-
-    @abstractmethod
-    def _user_setter(self, value: ClaimsPrincipal | None) -> None:
-        pass
+        self.request.scope["user"] = value
 
     async def authenticate(self, scheme: str) -> AuthenticationResult:
         handler = await self.get_authentication_handler(scheme)
