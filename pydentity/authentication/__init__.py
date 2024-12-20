@@ -7,3 +7,4 @@ from pydentity.authentication.base import (
     AuthenticationSchemeProvider as AuthenticationSchemeProvider,
     DefaultAuthenticationDataProtector as DefaultAuthenticationDataProtector,
 )
+from pydentity.authentication.builder import AuthenticationBuilder as AuthenticationBuilder
