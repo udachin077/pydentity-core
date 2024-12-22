@@ -1,36 +1,46 @@
 import base64
 import json
-from typing import Any
+from typing import Any, Protocol
 
 from cryptography.fernet import Fernet
 
 from pydentity.interfaces import IPersonalDataProtector
-
-__all__ = ("DefaultPersonalDataProtector",)
-
 from pydentity.utils import ensure_bytes, ensure_str, generate_security_key
+
+__all__ = (
+    "DefaultPersonalDataProtector",
+    "JsonSerializer",
+)
+
+
+class JsonSerializer(Protocol):
+    def loads(self, data: str | bytes) -> Any:
+        pass
+
+    def dumps(self, obj: Any) -> str:
+        pass
 
 
 class DefaultPersonalDataProtector(IPersonalDataProtector):
     __slots__ = (
         "_fernet",
-        "_serializer",
+        "_json_serializer",
     )
 
     def __init__(
         self,
         key: bytes | str | None = None,
-        serializer: Any = None,
+        json_serializer: JsonSerializer = None,
     ) -> None:
         _key = base64.urlsafe_b64encode(ensure_bytes(key)) if key else generate_security_key(self.__class__)
         self._fernet = Fernet(_key)
-        self._serializer = serializer or json
+        self._json_serializer = json_serializer or json
 
     def _serialize(self, data: Any) -> str:
-        return self._serializer.dumps(data)
+        return self._json_serializer.dumps(data)
 
     def _deserialize(self, data: str | bytes) -> Any:
-        return self._serializer.loads(data)
+        return self._json_serializer.loads(data)
 
     def protect(self, data: Any) -> str:
         encrypted_data = self._fernet.encrypt(ensure_bytes(self._serialize(data)))
