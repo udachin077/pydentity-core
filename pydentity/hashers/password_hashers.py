@@ -1,6 +1,5 @@
 from typing import Generic, Sequence, Literal
 
-from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.hashes import HashAlgorithm
 from pwdlib.hashers import HasherProtocol
 
@@ -79,7 +78,7 @@ class Argon2PasswordHasher(PasswordHasher[TUser], Generic[TUser]):
 class PBKDF2PasswordHasher(PasswordHasher[TUser], Generic[TUser]):
     def __init__(
         self,
-        algorithm: HashAlgorithm = hashes.SHA256(),
+        algorithm: HashAlgorithm | None = None,
         hash_len: int = 32,
         iterations: int = 720000,
     ) -> None:

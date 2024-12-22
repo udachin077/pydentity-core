@@ -32,6 +32,7 @@ def must_update_salt(salt: str, expected_entropy: int) -> bool:
 
 class PBKDF2Hasher(HasherProtocol):
     salt_entropy: int = 128
+    prefix = "$pbkdf2$"
 
     __slots__ = (
         "_algorithm",
@@ -41,11 +42,11 @@ class PBKDF2Hasher(HasherProtocol):
 
     def __init__(
         self,
-        algorithm: HashAlgorithm = hashes.SHA256(),
+        algorithm: HashAlgorithm | None = None,
         hash_len: int = 32,
         iterations: int = 720000,
     ):
-        self._algorithm = algorithm
+        self._algorithm = algorithm or hashes.SHA256()
         self._hash_len = hash_len
         self._iterations = iterations
 
@@ -55,7 +56,7 @@ class PBKDF2Hasher(HasherProtocol):
 
     @classmethod
     def identify(cls, hash: str | bytes) -> bool:
-        return ensure_str(hash).startswith("$pbkdf2$")
+        return ensure_str(hash).startswith(cls.prefix)
 
     def hash(
         self,
@@ -73,20 +74,15 @@ class PBKDF2Hasher(HasherProtocol):
             salt=salt,
             iterations=self._iterations,
         )
-        hash = base64.b64encode(pbkdf2.derive(ensure_bytes(password)))
-        return "$pbkdf2$%s$%d$%s$%s" % (
-            self._algorithm.name,
-            self._iterations,
-            ensure_str(salt),
-            ensure_str(hash),
-        )
+        _hash = base64.b64encode(pbkdf2.derive(ensure_bytes(password)))
+        return f"{self.prefix}{self._algorithm.name}${self._iterations}${ensure_str(salt)}${ensure_str(_hash)}"
 
     def verify(
         self,
         password: str | bytes,
         hash: str | bytes,
     ) -> bool:
-        algorithm, iterations, salt, _hash = ensure_str(hash).removeprefix("$pbkdf2$").split("$", 3)
+        algorithm, iterations, salt, _hash = ensure_str(hash).removeprefix(self.prefix).split("$", 3)
         pbkdf2 = PBKDF2HMAC(
             algorithm=self._algorithm,
             length=self._hash_len,
@@ -100,6 +96,6 @@ class PBKDF2Hasher(HasherProtocol):
             return False
 
     def check_needs_rehash(self, hash: str | bytes) -> bool:
-        algorithm, iterations, salt, _hash = ensure_str(hash).removeprefix("$pbkdf2$").split("$", 3)
+        algorithm, iterations, salt, _hash = ensure_str(hash).removeprefix(self.prefix).split("$", 3)
         update_salt = must_update_salt(salt, self.salt_entropy)
         return (int(iterations) != self._iterations) or update_salt
