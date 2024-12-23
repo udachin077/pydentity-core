@@ -78,7 +78,7 @@ class DataProtectorTokenProvider(IUserTwoFactorTokenProvider[TUser], Generic[TUs
                     if not is_equals_security_stamp:
                         self._logger.error("Security stamp not equals.")
 
-                    return is_equals_security_stamp
+                    return is_equals_security_stamp  # type:ignore[no-any-return]
 
                 stamp_is_empty = not bool(data["stamp"])
 

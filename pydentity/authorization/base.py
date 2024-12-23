@@ -453,7 +453,7 @@ class AuthorizationPolicyProvider(IAuthorizationPolicyProvider, metaclass=Single
 
     __slots__ = ("_options",)
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._options = AuthorizationOptions()
 
     @lru_cache

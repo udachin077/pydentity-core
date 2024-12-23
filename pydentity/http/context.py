@@ -35,7 +35,7 @@ class HttpContext:
     @property
     def user(self) -> ClaimsPrincipal | None:
         """Gets the user for this request."""
-        return self.request.user
+        return self.request.user  # type:ignore[no-any-return]
 
     @user.setter
     def user(self, value: ClaimsPrincipal | None) -> None:

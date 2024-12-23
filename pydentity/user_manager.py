@@ -362,7 +362,7 @@ class UserManager(Generic[TUser]):
         :param user: The user to generate the stamp for.
         :return:
         """
-        return uuid7str()
+        return uuid7str()  # type:ignore[no-any-return]
 
     @overload
     async def create(self, user: TUser) -> IdentityResult:
@@ -1699,7 +1699,7 @@ class UserManager(Generic[TUser]):
 
     def _new_security_stamp(self) -> str:
         """Returns new stamp."""
-        return uuid7str()
+        return uuid7str()  # type:ignore[no-any-return]
 
     async def _update_user(self, user: TUser) -> IdentityResult:
         """Called to update the user after validating and updating the normalized email or username."""

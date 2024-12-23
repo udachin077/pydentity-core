@@ -1,5 +1,6 @@
 import base64
 from datetime import datetime as _datetime, timedelta, UTC
+from typing import Any
 
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
@@ -61,7 +62,7 @@ def ensure_bytes(v: str | bytes, *, encoding: str = "utf-8") -> bytes:
     return v.encode(encoding) if isinstance(v, str) else v
 
 
-def generate_security_key(cls) -> bytes:
+def generate_security_key(cls: Any) -> bytes:
     try:
         import machineid
     except ImportError:
