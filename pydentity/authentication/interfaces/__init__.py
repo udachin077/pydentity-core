@@ -1,9 +1,8 @@
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
-from typing import TYPE_CHECKING, Optional, Any
+from typing import TYPE_CHECKING, Any
 
 from pydentity.security.claims import ClaimsPrincipal
-from pydentity.types import TRequest, TResponse
 
 if TYPE_CHECKING:
     from pydentity.http.context import HttpContext
@@ -17,7 +16,7 @@ class IAuthenticationHandler(ABC):
     """Used to provide authentication."""
 
     @abstractmethod
-    async def authenticate(self, context: "HttpContext[TRequest, TResponse]", scheme: str) -> "AuthenticationResult":
+    async def authenticate(self, context: "HttpContext", scheme: str) -> "AuthenticationResult":
         """
         Authenticate for the specified authentication scheme.
 
@@ -27,9 +26,7 @@ class IAuthenticationHandler(ABC):
         """
 
     @abstractmethod
-    async def sign_in(
-        self, context: "HttpContext[TRequest, TResponse]", scheme: str, principal: ClaimsPrincipal, **properties: Any
-    ) -> None:
+    async def sign_in(self, context: "HttpContext", scheme: str, principal: ClaimsPrincipal, **properties: Any) -> None:
         """
         Sign a principal in for the specified authentication scheme.
 
@@ -41,7 +38,7 @@ class IAuthenticationHandler(ABC):
         """
 
     @abstractmethod
-    async def sign_out(self, context: "HttpContext[TRequest, TResponse]", scheme: str) -> None:
+    async def sign_out(self, context: "HttpContext", scheme: str) -> None:
         """
         Sign out the specified authentication scheme.
 
@@ -59,7 +56,7 @@ class IAuthenticationSchemeProvider:
         """Returns all currently registered ``AuthenticationSchemes``."""
 
     @abstractmethod
-    async def get_scheme(self, name: str) -> Optional["AuthenticationScheme"]:
+    async def get_scheme(self, name: str) -> "AuthenticationScheme | None":
         """
         Returns the ``AuthenticationScheme`` matching the name, or null.
 
@@ -68,7 +65,7 @@ class IAuthenticationSchemeProvider:
         """
 
     @abstractmethod
-    async def get_default_authentication_scheme(self) -> Optional["AuthenticationScheme"]:
+    async def get_default_authentication_scheme(self) -> "AuthenticationScheme | None":
         """
         Returns the scheme that will be used by default for `authenticate(HttpContext, str)`.
         This is typically specified via AuthenticationOptions.default_authenticate_scheme.
@@ -78,7 +75,7 @@ class IAuthenticationSchemeProvider:
         """
 
     @abstractmethod
-    async def get_default_sign_in_scheme(self) -> Optional["AuthenticationScheme"]:
+    async def get_default_sign_in_scheme(self) -> "AuthenticationScheme | None":
         """
         Returns the scheme that will be used by default for `sign_in(HttpContext, str, ClaimsPrincipal, dict[str, ...])`.
         This is typically specified via AuthenticationOptions.default_sign_in_scheme.
@@ -88,7 +85,7 @@ class IAuthenticationSchemeProvider:
         """
 
     @abstractmethod
-    async def get_default_sign_out_scheme(self) -> Optional["AuthenticationScheme"]:
+    async def get_default_sign_out_scheme(self) -> "AuthenticationScheme | None":
         """
         Returns the scheme that will be used by default for `sign_out(HttpContext, str)`.
         This is typically specified via AuthenticationOptions.default_sign_out_scheme.

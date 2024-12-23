@@ -30,7 +30,7 @@ class DefaultPersonalDataProtector(IPersonalDataProtector):
     def __init__(
         self,
         key: bytes | str | None = None,
-        json_serializer: JsonSerializer = None,
+        json_serializer: JsonSerializer | None = None,
     ) -> None:
         _key = base64.urlsafe_b64encode(ensure_bytes(key)) if key else generate_security_key(self.__class__)
         self._fernet = Fernet(_key)

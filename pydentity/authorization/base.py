@@ -1,7 +1,7 @@
 from collections.abc import Iterable, Callable, Awaitable
 from functools import lru_cache
 from inspect import isfunction
-from typing import Literal, Any, overload, Generic, Self
+from typing import Literal, Any, overload, Self
 
 from pydentity._meta import SingletonMeta  # noqa
 from pydentity.authorization.interfaces import (
@@ -10,7 +10,6 @@ from pydentity.authorization.interfaces import (
 )
 from pydentity.exc import ArgumentNoneException, InvalidOperationException
 from pydentity.security.claims import ClaimsPrincipal, Claim
-from pydentity.types import TRequest
 
 __all__ = (
     "AuthorizationError",
@@ -28,14 +27,14 @@ class AuthorizationError(Exception):
     pass
 
 
-class AuthorizationHandlerContext(Generic[TRequest]):
+class AuthorizationHandlerContext:
     __slots__ = (
         "_request",
         "_fail_called",
         "_succeeded_called",
     )
 
-    def __init__(self, request: TRequest) -> None:
+    def __init__(self, request: Any) -> None:
         self._request = request
         self._fail_called = False
         self._succeeded_called = False

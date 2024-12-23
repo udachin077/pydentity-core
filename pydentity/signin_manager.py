@@ -4,7 +4,7 @@ from typing import Generic
 
 from pydentity.authentication.interfaces import IAuthenticationSchemeProvider
 from pydentity.exc import ArgumentNoneException
-from pydentity.http.context import HttpContext, IHttpContextAccessor
+from pydentity.http.context import HttpContext, HttpContextAccessor
 from pydentity.identity_constants import IdentityConstants
 from pydentity.identity_error import IdentityError
 from pydentity.identity_options import IdentityOptions
@@ -13,7 +13,7 @@ from pydentity.interfaces import IUserClaimsPrincipalFactory, IUserConfirmation,
 from pydentity.loggers import sign_in_manager_logger
 from pydentity.security.claims import ClaimsPrincipal, ClaimsIdentity, Claim, ClaimTypes
 from pydentity.signin_result import SignInResult
-from pydentity.types import TRequest, TResponse, TUser
+from pydentity.types import TUser
 from pydentity.user_confirmation import DefaultUserConfirmation
 from pydentity.user_manager import UserManager
 
@@ -35,7 +35,7 @@ class SignInManager(Generic[TUser]):
     """Provides the APIs for user sign in."""
 
     __slots__ = (
-        "__two_factor_info",
+        "_two_factor_info",
         "_confirmation",
         "_context_accessor",
         "_schemes",
@@ -49,27 +49,27 @@ class SignInManager(Generic[TUser]):
     def __init__(
         self,
         user_manager: UserManager[TUser],
-        context_accessor: IHttpContextAccessor[TRequest, TResponse],
+        context_accessor: HttpContextAccessor,
         schemes: IAuthenticationSchemeProvider,
-        claims_factory: IUserClaimsPrincipalFactory[TUser],
+        user_claims_factory: IUserClaimsPrincipalFactory[TUser],
         confirmation: IUserConfirmation[TUser] | None = None,
         options: IdentityOptions | None = None,
         logger: ILogger["SignInManager[TUser]"] | None = None,
     ):
         if not user_manager:
             raise ArgumentNoneException("user_manager")
-        if not claims_factory:
-            raise ArgumentNoneException("claims_factory")
+        if not user_claims_factory:
+            raise ArgumentNoneException("user_claims_factory")
 
-        self.user_manager = user_manager
-        self.claims_factory = claims_factory
         self._confirmation = confirmation or DefaultUserConfirmation()
+        self._context_accessor = context_accessor
+        self._schemes = schemes
+        self._two_factor_info: TwoFactorAuthenticationInfo | None = None
+        self.user_manager = user_manager
+        self.claims_factory = user_claims_factory
         self.options = options or IdentityOptions()
         self.logger: ILogger["SignInManager[TUser]"] | logging.Logger = logger or sign_in_manager_logger
         self.authentication_scheme = IdentityConstants.ApplicationScheme
-        self._context_accessor = context_accessor
-        self._schemes = schemes
-        self.__two_factor_info: TwoFactorAuthenticationInfo | None = None
 
     @property
     def context(self) -> HttpContext:
@@ -185,7 +185,7 @@ class SignInManager(Generic[TUser]):
         self.logger.debug("Failed to validate a security stamp.")
         return None
 
-    async def is_valid_security_stamp(self, user: TUser, security_stamp: str) -> bool:
+    async def is_valid_security_stamp(self, user: TUser | None, security_stamp: str | None) -> bool:
         """
         Validates the security stamp for the specified user.
         If no user is specified, or if the stores does not support security stamps, validation is considered successful.
@@ -200,7 +200,7 @@ class SignInManager(Generic[TUser]):
             # Only validate the security stamp if the store supports it
             (
                 not self.user_manager.supports_user_security_stamp
-                or security_stamp == await self.user_manager.get_security_stamp(user)
+                or (security_stamp is not None and security_stamp == await self.user_manager.get_security_stamp(user))
             )
         )
 
@@ -329,13 +329,13 @@ class SignInManager(Generic[TUser]):
 
         result = await self.user_manager.redeem_two_factor_recovery_code(two_factor_info.user, recovery_code)
         if result.succeeded:
-            return await self.__do_two_factor_sign_in(
+            return await self._do_two_factor_sign_in(
                 two_factor_info.user, two_factor_info, is_persistent=False, remember_client=False
             )
 
         return SignInResult.failed()
 
-    async def __do_two_factor_sign_in(
+    async def _do_two_factor_sign_in(
         self,
         user: TUser,
         two_factor_info: TwoFactorAuthenticationInfo,
@@ -389,7 +389,7 @@ class SignInManager(Generic[TUser]):
         if await self.user_manager.verify_two_factor_token(
             user, self.options.tokens.authenticator_token_provider, code
         ):
-            return await self.__do_two_factor_sign_in(user, two_factor_info, is_persistent, remember_client)
+            return await self._do_two_factor_sign_in(user, two_factor_info, is_persistent, remember_client)
 
         if self.user_manager.supports_user_lockout:
             increment_lockout_result = await self.user_manager.access_failed(user)
@@ -425,7 +425,7 @@ class SignInManager(Generic[TUser]):
             return error
 
         if await self.user_manager.verify_two_factor_token(user, provider, code):
-            return await self.__do_two_factor_sign_in(user, two_factor_info, is_persistent, remember_client)
+            return await self._do_two_factor_sign_in(user, two_factor_info, is_persistent, remember_client)
 
         if self.user_manager.supports_user_lockout:
             increment_lockout_result = await self.user_manager.access_failed(user)
@@ -481,7 +481,7 @@ class SignInManager(Generic[TUser]):
     ) -> SignInResult:
         if not bypass_two_factor and await self._is_two_factor_enabled(user):
             if not await self.is_two_factor_client_remembered(user):
-                self.__two_factor_info = TwoFactorAuthenticationInfo(user=user, login_provider=login_provider)
+                self._two_factor_info = TwoFactorAuthenticationInfo(user=user, login_provider=login_provider)
                 if await self._schemes.get_scheme(IdentityConstants.TwoFactorUserIdScheme):
                     user_id = await self.user_manager.get_user_id(user)
                     await self.context.sign_in(
@@ -501,8 +501,8 @@ class SignInManager(Generic[TUser]):
         return SignInResult.success(self.context.response)
 
     async def retrieve_two_factor_info(self) -> TwoFactorAuthenticationInfo | None:
-        if self.__two_factor_info:
-            return self.__two_factor_info
+        if self._two_factor_info:
+            return self._two_factor_info
 
         result = await self.context.authenticate(IdentityConstants.TwoFactorUserIdScheme)
         if not result or not result.principal:

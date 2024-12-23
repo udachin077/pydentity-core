@@ -2,20 +2,17 @@ from abc import ABC, abstractmethod
 from collections import defaultdict
 from collections.abc import Iterable, Generator, Sequence
 from datetime import timedelta, datetime
-from typing import Any
+from typing import Any, Self
 
 import jwt
-from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePrivateKey
-from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
-from cryptography.hazmat.primitives.asymmetric.ed448 import Ed448PrivateKey
-from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey
+from jwt import PyJWK
+from jwt.algorithms import AllowedPublicKeys, AllowedPrivateKeys
 from jwt.exceptions import InvalidKeyError, ExpiredSignatureError, PyJWTError
 
 from pydentity.authentication import AuthenticationResult
 from pydentity.authentication.interfaces import IAuthenticationHandler
 from pydentity.http.context import HttpContext
 from pydentity.security.claims import Claim, ClaimsPrincipal, ClaimsIdentity
-from pydentity.types import TRequest, TResponse
 
 __all__ = (
     "JWTSecurityToken",
@@ -24,23 +21,23 @@ __all__ = (
     "IPrincipalClaimsSerializer",
 )
 
-KeyType = RSAPrivateKey | EllipticCurvePrivateKey | Ed25519PrivateKey | Ed448PrivateKey | str | bytes
+SigninKeyType = AllowedPrivateKeys | PyJWK | str | bytes
 
 STANDARD_CLAIM = ("aud", "exp", "iat", "iss", "jti", "nbf", "sub")
 
 
 class IPrincipalClaimsSerializer(ABC):
     @abstractmethod
-    def dumps(self, claims: list[Claim]) -> dict[str, Any]:
+    def dumps(self, claims: Iterable[Claim]) -> dict[str, Any]:
         pass
 
     @abstractmethod
-    def loads(self, payload: dict[str, Any]) -> Generator[Claim]:
+    def loads(self, payload: dict[str, Any], exclude_claims: Sequence[str] = STANDARD_CLAIM) -> Generator[Claim]:
         pass
 
 
 class DefaultPrincipalClaimSerializer(IPrincipalClaimsSerializer):
-    def dumps(self, claims: list[Claim]) -> dict[str, Any]:
+    def dumps(self, claims: Iterable[Claim]) -> dict[str, Any]:
         _claims = defaultdict(list)
         for claim in claims:
             _claims[claim.type].append(claim.value)
@@ -55,11 +52,11 @@ class DefaultPrincipalClaimSerializer(IPrincipalClaimsSerializer):
 
 
 class JWTSecurityToken(dict[str, Any]):
-    serializer: IPrincipalClaimsSerializer = DefaultPrincipalClaimSerializer()
+    claims_serializer: IPrincipalClaimsSerializer = DefaultPrincipalClaimSerializer()
 
     def __init__(
         self,
-        signin_key: KeyType,
+        signing_key: SigninKeyType,
         algorithm: str = "HS256",
         audience: str | None = None,
         claims: Iterable[Claim] | None = None,
@@ -72,7 +69,7 @@ class JWTSecurityToken(dict[str, Any]):
         **kwargs: Any,
     ) -> None:
         super().__init__(kwargs)
-        self._signing_key = signin_key
+        self._signing_key = signing_key
         self.algorithm = algorithm
         self.headers = headers
         self.claims = claims or []
@@ -138,36 +135,47 @@ class JWTSecurityToken(dict[str, Any]):
             del self[key]
 
     def encode(self) -> str:
-        if self.expires and self.not_before and self.not_before >= self.expires:
-            raise ExpiredSignatureError(f"Expires: '{self.expires}' must be after not_before: '{self.not_before}'.")
+        not_before = self.not_before
+        expires = self.expires
+
+        if expires and not_before:
+            nb = not_before.timestamp() if isinstance(not_before, datetime) else not_before
+            exp = expires.timestamp() if isinstance(expires, datetime) else expires
+
+            if nb >= exp:
+                raise ExpiredSignatureError(f"Expires: '{self.expires}' must be after not_before: '{self.not_before}'.")
 
         if not self._signing_key:
             raise InvalidKeyError()
 
-        self.update(self.serializer.dumps(self.claims))
+        self.update(self.claims_serializer.dumps(self.claims))
         return jwt.encode(self, self._signing_key, self.algorithm, self.headers)
 
     @classmethod
     def decode(
         cls,
         token: str | bytes,
-        key: KeyType,
+        signing_key: AllowedPrivateKeys | AllowedPublicKeys | PyJWK | str | bytes,
         algorithms: list[str] | None = None,
         options: dict[str, Any] | None = None,
         audience: str | Iterable[str] | None = None,
         issuer: str | list[str] | None = None,
         leeway: float | timedelta = 0,
-    ) -> "JWTSecurityToken":
+    ) -> Self:
         payload = jwt.decode(
             token,
-            key,
+            signing_key,  # type:ignore[arg-type]
             algorithms=algorithms or ["HS256"],
             audience=audience,
             issuer=issuer,
             options=options,
             leeway=leeway,
         )
-        return JWTSecurityToken(signin_key=key, claims=[*cls.serializer.loads(payload)] or None, **payload)
+        return cls(
+            signing_key="secret",
+            claims=[*cls.claims_serializer.loads(payload)] or None,
+            **payload,
+        )
 
 
 class TokenValidationParameters:
@@ -184,7 +192,7 @@ class TokenValidationParameters:
 
     def __init__(
         self,
-        issuer_signing_key: KeyType,
+        issuer_signing_key: AllowedPrivateKeys | AllowedPublicKeys | PyJWK | str | bytes,
         valid_algorithms: list[str] | None = None,
         valid_audiences: str | Iterable[str] | None = None,
         valid_issuers: str | list[str] | None = None,
@@ -206,20 +214,13 @@ def _get_authorization_scheme_param(authorization_header_value: str | None) -> t
     return scheme, param
 
 
-def _create_principal_from_jwt_security_token(token: JWTSecurityToken) -> ClaimsPrincipal:
-    identity = ClaimsIdentity("AuthenticationTypes.Federation")
-    if token.claims:
-        identity.add_claims(*token.claims)
-    return ClaimsPrincipal(identity)
-
-
 class JWTBearerAuthenticationHandler(IAuthenticationHandler):
     __slots__ = ("_validation_parameters",)
 
     def __init__(self, validation_parameters: TokenValidationParameters) -> None:
         self._validation_parameters = validation_parameters
 
-    async def authenticate(self, context: HttpContext[TRequest, TResponse], scheme: str) -> AuthenticationResult:
+    async def authenticate(self, context: HttpContext, scheme: str) -> AuthenticationResult:
         authorization = context.request.headers.get("Authorization")
         scheme, token = _get_authorization_scheme_param(authorization)
 
@@ -229,21 +230,23 @@ class JWTBearerAuthenticationHandler(IAuthenticationHandler):
         try:
             jwt_token = JWTSecurityToken.decode(
                 token,
-                key=self._validation_parameters.issuer_signing_key,
+                signing_key=self._validation_parameters.issuer_signing_key,
                 algorithms=self._validation_parameters.valid_algorithms,
                 audience=self._validation_parameters.valid_audiences,
                 issuer=self._validation_parameters.valid_issuers,
                 options=self._validation_parameters.options,
                 leeway=self._validation_parameters.leeway,
             )
-            return AuthenticationResult(_create_principal_from_jwt_security_token(jwt_token), {})
         except PyJWTError:
             return AuthenticationResult(ClaimsPrincipal(), {})
+        else:
+            identity = ClaimsIdentity("AuthenticationTypes.Federation")
+            if jwt_token.claims:
+                identity.add_claims(*jwt_token.claims)
+            return AuthenticationResult(ClaimsPrincipal(identity), {})
 
-    async def sign_in(
-        self, context: HttpContext[TRequest, TResponse], scheme: str, principal: ClaimsPrincipal, **properties: Any
-    ) -> None:
+    async def sign_in(self, context: HttpContext, scheme: str, principal: ClaimsPrincipal, **properties: Any) -> None:
         pass
 
-    async def sign_out(self, context: HttpContext[TRequest, TResponse], scheme: str) -> None:
+    async def sign_out(self, context: HttpContext, scheme: str) -> None:
         pass

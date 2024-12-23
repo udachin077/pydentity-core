@@ -1,5 +1,4 @@
 import json
-import sys
 from datetime import timedelta
 from functools import lru_cache
 from typing import Literal, Any
@@ -9,7 +8,6 @@ from pydentity.authentication.interfaces import IAuthenticationHandler, IAuthent
 from pydentity.http.context import HttpContext
 from pydentity.security.claims import ClaimsPrincipal
 from pydentity.security.claims.serializer import principal_dumps, principal_loads
-from pydentity.types import TRequest, TResponse
 from pydentity.utils import datetime
 
 __all__ = (
@@ -18,7 +16,7 @@ __all__ = (
 )
 
 
-def _create_expires(seconds: float | None) -> int:
+def _create_expires(seconds: float | None) -> int | None:
     return int(datetime.utcnow().add_seconds(seconds).timestamp()) if seconds is not None else None
 
 
@@ -27,19 +25,18 @@ def _get_auth_cookie_name(scheme: str, name: str | None = None) -> str:
     return name or scheme
 
 
-@lru_cache
-def _split_auth_cookie_value(key: str, value: str, max_size: int = 4090) -> dict[str, str]:
-    if sys.getsizeof(value) <= max_size:
+def _split_auth_cookie_value(key: str, value: str, chunk_size: int = 2048) -> dict[str, str]:
+    if len(value) <= chunk_size:
         return {key: value}
 
-    chunks = [value[i : i + max_size] for i in range(0, len(value), max_size)]
-    _chunks = {key: f"chunks-{len(chunks)}"}
-    _chunks.update({f"{key}C{i}": chunk for i, chunk in enumerate(chunks, 1)})
-    return _chunks
+    chunks = [value[i : i + chunk_size] for i in range(0, len(value), chunk_size)]
+    cookies = {key: f"chunks-{len(chunks)}"}
+    cookies.update({f"{key}C{i}": chunk for i, chunk in enumerate(chunks, 1)})
+    return cookies
 
 
 def _join_auth_cookie_value(cookies: dict[str, str], key: str) -> str:
-    chunks_count = int(cookies.get(key).removeprefix("chunks-"))
+    chunks_count = int(cookies[key].removeprefix("chunks-"))
     return "".join(cookies[f"{key}C{i}"] for i in range(1, chunks_count + 1, 1))
 
 
@@ -81,6 +78,8 @@ class CookieAuthenticationOptions:
         """
         if max_age_timedelta is None:
             self.max_age_timedelta = timedelta(days=7).total_seconds()
+        elif isinstance(max_age_timedelta, timedelta):
+            self.max_age_timedelta = max_age_timedelta.total_seconds()
         else:
             self.max_age_timedelta = max_age_timedelta
 
@@ -112,7 +111,7 @@ class CookieAuthenticationHandler(IAuthenticationHandler):
         self.options = options or CookieAuthenticationOptions()
         self.protector = protector or DefaultAuthenticationDataProtector()
 
-    async def authenticate(self, context: HttpContext[TRequest, TResponse], scheme: str) -> AuthenticationResult:
+    async def authenticate(self, context: HttpContext, scheme: str) -> AuthenticationResult:
         return self._decode_authentication_cookie(scheme, context.request.cookies)
 
     async def sign_in(self, context: HttpContext, scheme: str, principal: ClaimsPrincipal, **properties: Any) -> None:
@@ -132,7 +131,7 @@ class CookieAuthenticationHandler(IAuthenticationHandler):
                 samesite=self.options.samesite,
             )
 
-    async def sign_out(self, context: HttpContext[TRequest, TResponse], scheme: str) -> None:
+    async def sign_out(self, context: HttpContext, scheme: str) -> None:
         for key in context.request.cookies:
             if key.startswith(_get_auth_cookie_name(scheme, self.options.name)):
                 context.response.delete_cookie(key)

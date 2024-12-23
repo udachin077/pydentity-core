@@ -1,4 +1,3 @@
-import base64
 from typing import TYPE_CHECKING, Generic, override, Any
 
 from pydentity.interfaces import IUserTwoFactorTokenProvider

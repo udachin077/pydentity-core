@@ -2,7 +2,7 @@ import datetime as dt
 import logging
 import secrets
 from collections.abc import Iterable
-from typing import Any, Final, Generic, Union, cast, overload
+from typing import Any, Final, Generic, cast, overload
 
 from uuid_extensions import uuid7str
 
@@ -286,7 +286,7 @@ class UserManager(Generic[TUser]):
         """
         ...
 
-    async def get_username(self, user: Union[ClaimsPrincipal, TUser]) -> str | None:
+    async def get_username(self, user: ClaimsPrincipal | TUser) -> str | None:
         if not user:
             raise ArgumentNoneException("user")
 
@@ -330,7 +330,7 @@ class UserManager(Generic[TUser]):
         """
         ...
 
-    async def get_user_id(self, user: Union[ClaimsPrincipal, TUser]) -> str | None:
+    async def get_user_id(self, user: ClaimsPrincipal | TUser) -> str | None:
         if not user:
             raise ArgumentNoneException("user")
 

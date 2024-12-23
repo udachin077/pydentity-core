@@ -1,11 +1,7 @@
-import base64
-import uuid
-from typing import cast
-
 import pytest
 from uuid_extensions import uuid7str
 
-from pydentity import UserManager, IdentityOptions
+from pydentity import IdentityOptions
 from pydentity.rfc6238service import generate_code, generate_key
 from pydentity.token_providers import (
     TotpSecurityStampBasedTokenProvider,

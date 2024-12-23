@@ -6,4 +6,3 @@ from pydentity.authorization.base import (
     AuthorizationPolicyBuilder as AuthorizationPolicyBuilder,
     AuthorizationPolicyProvider as AuthorizationPolicyProvider,
 )
-from pydentity.authorization.builder import AuthorizationBuilder as AuthorizationBuilder

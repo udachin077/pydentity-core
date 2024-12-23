@@ -1,6 +1,5 @@
-from abc import ABC
 from functools import lru_cache
-from typing import Any, Generic
+from typing import Any
 
 from pydentity.authentication import AuthenticationResult
 from pydentity.authentication.interfaces import (
@@ -9,28 +8,27 @@ from pydentity.authentication.interfaces import (
 )
 from pydentity.exc import InvalidOperationException
 from pydentity.security.claims import ClaimsPrincipal
-from pydentity.types import TRequest, TResponse
 
 
-class HttpContext(Generic[TRequest, TResponse]):
+class HttpContext:
     __slots__ = (
         "_request",
         "_response",
         "_schemes",
     )
 
-    def __init__(self, request: TRequest, response: TResponse, schemes: IAuthenticationSchemeProvider) -> None:
+    def __init__(self, request: Any, response: Any, schemes: IAuthenticationSchemeProvider) -> None:
         self._schemes = schemes
         self._request = request
         self._response = response
 
     @property
-    def request(self) -> TRequest:
+    def request(self) -> Any:
         """Gets the Request object for this request."""
         return self._request
 
     @property
-    def response(self) -> TResponse:
+    def response(self) -> Any:
         """Gets the Response object for this request."""
         return self._response
 
@@ -63,16 +61,15 @@ class HttpContext(Generic[TRequest, TResponse]):
         raise InvalidOperationException(f"Scheme '{name}' not registered.")
 
 
-class IHttpContextAccessor(Generic[TRequest, TResponse], ABC):
-    context_class: type[HttpContext[TRequest, TResponse]] = HttpContext[TRequest, TResponse]
-    response_class: TResponse
+class HttpContextAccessor:
+    response_class: Any
 
-    __slots__ = ("__http_context",)
+    __slots__ = ("_http_context",)
 
-    def __init__(self, request: TRequest, schemes: IAuthenticationSchemeProvider) -> None:
-        self.__http_context = self.context_class(request, self.response_class(None, status_code=204), schemes)  # type: ignore
+    def __init__(self, request: Any, schemes: IAuthenticationSchemeProvider) -> None:
+        self._http_context = HttpContext(request, self.response_class(None, status_code=204), schemes)
 
     @property
     def http_context(self) -> HttpContext:
         """Gets or sets the current ``HttpContext``. Returns None if there is no active ``HttpContext``."""
-        return self.__http_context
+        return self._http_context

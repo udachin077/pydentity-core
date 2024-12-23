@@ -1,9 +1,7 @@
-from typing import Generic
-
-from pydentity.types import TResponse
+from typing import Any
 
 
-class SignInResult(Generic[TResponse]):
+class SignInResult:
     __slots__ = (
         "_succeeded",
         "_is_locked_out",
@@ -18,7 +16,7 @@ class SignInResult(Generic[TResponse]):
         is_locked_out: bool = False,
         is_not_allowed: bool = False,
         requires_two_factor: bool = False,
-        response: TResponse | None = None,
+        response: Any | None = None,
     ):
         self._succeeded = succeeded
         self._is_locked_out = is_locked_out
@@ -43,27 +41,27 @@ class SignInResult(Generic[TResponse]):
         return self._requires_two_factor
 
     @property
-    def response(self) -> TResponse | None:
+    def response(self) -> Any | None:
         return self._response
 
     @staticmethod
-    def success(response: TResponse) -> "SignInResult":
+    def success(response: Any) -> "SignInResult":
         return SignInResult(succeeded=True, response=response)
 
     @staticmethod
-    def locked_out(response: TResponse | None = None) -> "SignInResult":
+    def locked_out(response: Any | None = None) -> "SignInResult":
         return SignInResult(is_locked_out=True, response=response)
 
     @staticmethod
-    def not_allowed(response: TResponse | None = None) -> "SignInResult":
+    def not_allowed(response: Any | None = None) -> "SignInResult":
         return SignInResult(is_not_allowed=True, response=response)
 
     @staticmethod
-    def two_factor_required(response: TResponse) -> "SignInResult":
+    def two_factor_required(response: Any) -> "SignInResult":
         return SignInResult(requires_two_factor=True, response=response)
 
     @staticmethod
-    def failed(response: TResponse | None = None) -> "SignInResult":
+    def failed(response: Any | None = None) -> "SignInResult":
         return SignInResult(response=response)
 
     def __str__(self) -> str:

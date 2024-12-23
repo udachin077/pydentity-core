@@ -1,6 +1,6 @@
 from collections.abc import Iterable, Generator
 from inspect import isfunction
-from typing import Any, Final, Literal, Optional, overload
+from typing import Any, Final, Literal, overload, Self
 
 from pydentity.exc import ArgumentNoneException
 from pydentity.security.claims.claim_types import ClaimTypes
@@ -29,7 +29,7 @@ class Claim:
         claim_value: Any,
         issuer: str = DEFAULT_ISSUER,
         original_issuer: str | None = None,
-        identity: Optional["ClaimsIdentity"] = None,
+        identity: "ClaimsIdentity| None" = None,
     ) -> None:
         """
 
@@ -60,7 +60,7 @@ class Claim:
         return self._value
 
     @property
-    def subject(self) -> Optional["ClaimsIdentity"]:
+    def subject(self) -> "ClaimsIdentity | None":
         """Gets the subject of the ``Claim``."""
         return self._subject
 
@@ -74,14 +74,14 @@ class Claim:
         """Gets the original issuer of the ``Claim``."""
         return self._original_issuer
 
-    def clone(self, identity: "ClaimsIdentity") -> "Claim":
+    def clone(self, identity: "ClaimsIdentity") -> Self:
         """
         Creates a new instance ``Claim`` with values copied from this object.
 
         :param identity: The value for ``Claim.subject``, which is the ``ClaimsIdentity`` that has these claims.
         :return:
         """
-        return Claim(self.type, self.value, self.issuer, self.original_issuer, identity)
+        return self.__class__(self.type, self.value, self.issuer, self.original_issuer, identity)
 
     def __repr__(self) -> str:
         return f"<{self.__class__.__name__} {self.type}:{self.value} object at {hex(id(self))}>"

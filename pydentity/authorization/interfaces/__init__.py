@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from pydentity.authorization.base import (
@@ -25,7 +25,7 @@ class IAuthorizationPolicyProvider:
     """A type which can provide ``AuthorizationPolicy`` for a particular name."""
 
     @abstractmethod
-    async def get_policy(self, name: str) -> Optional["AuthorizationPolicy"]:
+    async def get_policy(self, name: str) -> "AuthorizationPolicy | None":
         """
         Gets a ``AuthorizationPolicy`` from the given policy name.
 
@@ -34,5 +34,5 @@ class IAuthorizationPolicyProvider:
         """
 
     @abstractmethod
-    async def get_default_policy(self) -> Optional["AuthorizationPolicy"]:
+    async def get_default_policy(self) -> "AuthorizationPolicy | None":
         """Gets the default authorization policy."""

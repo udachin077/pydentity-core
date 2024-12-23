@@ -1,6 +1,5 @@
-from collections.abc import Callable
 from datetime import datetime
-from typing import TypeVar, Protocol, Optional, Union
+from typing import TypeVar, Protocol, Callable
 from uuid import UUID
 
 __all__ = (
@@ -22,50 +21,40 @@ __all__ = (
     "TUserLogin",
     "TUserToken",
     "TRoleClaim",
-    "TRequest",
-    "TResponse",
 )
-
-TRequest = TypeVar("TRequest")
-TResponse = TypeVar("TResponse")
 
 _T = TypeVar("_T")
-TKey = TypeVar(
-    "TKey",
-    int,
-    str,
-    UUID,
-)
+TKey = TypeVar("TKey", int, str, UUID)
 
 Predicate = Callable[[_T], bool]
 Action = Callable[[_T], None]
 
-GUID = Union[UUID, str]
+GUID = UUID | str
 
 
 class UserProtokol(Protocol[TKey]):
     access_failed_count: int
-    concurrency_stamp: Optional[GUID]
-    email: Optional[str]
+    concurrency_stamp: GUID | None
+    email: str | None
     email_confirmed: bool
     id: TKey
     lockout_enabled: bool
-    lockout_end: Optional[datetime]
-    normalized_email: Optional[str]
-    normalized_username: Optional[str]
-    password_hash: Optional[str]
-    phone_number: Optional[str]
+    lockout_end: datetime | None
+    normalized_email: str | None
+    normalized_username: str | None
+    password_hash: str | None
+    phone_number: str | None
     phone_number_confirmed: bool
-    security_stamp: Optional[GUID]
+    security_stamp: GUID | None
     two_factor_enabled: bool
-    username: Optional[str]
+    username: str | None
 
 
 class RoleProtokol(Protocol[TKey]):
-    concurrency_stamp: Optional[GUID]
+    concurrency_stamp: GUID | None
     id: TKey
-    name: Optional[str]
-    normalized_name: Optional[str]
+    name: str | None
+    normalized_name: str | None
 
 
 class UserRoleProtokol(Protocol[TKey]):
@@ -74,35 +63,35 @@ class UserRoleProtokol(Protocol[TKey]):
 
 
 class UserClaimProtokol(Protocol[TKey]):
-    claim_type: Optional[str]
-    claim_value: Optional[str]
+    claim_type: str | None
+    claim_value: str | None
     user_id: TKey
 
 
 class UserLoginProtokol(Protocol[TKey]):
     login_provider: str
     provider_key: str
-    provider_display_name: Optional[str]
+    provider_display_name: str | None
     user_id: TKey
 
 
 class UserTokenProtokol(Protocol[TKey]):
     login_provider: str
     name: str
-    value: Optional[str]
+    value: str | None
     user_id: TKey
 
 
 class RoleClaimProtokol(Protocol[TKey]):
-    claim_type: Optional[str]
-    claim_value: Optional[str]
+    claim_type: str | None
+    claim_value: str | None
     role_id: TKey
 
 
-TUser = TypeVar("TUser", bound=UserProtokol)  # type: ignore
-TRole = TypeVar("TRole", bound=RoleProtokol)  # type: ignore
-TUserRole = TypeVar("TUserRole", bound=UserRoleProtokol)  # type: ignore
-TUserClaim = TypeVar("TUserClaim", bound=UserClaimProtokol)  # type: ignore
-TUserLogin = TypeVar("TUserLogin", bound=UserLoginProtokol)  # type: ignore
-TUserToken = TypeVar("TUserToken", bound=UserTokenProtokol)  # type: ignore
-TRoleClaim = TypeVar("TRoleClaim", bound=RoleClaimProtokol)  # type: ignore
+TUser = TypeVar("TUser", bound=UserProtokol)
+TRole = TypeVar("TRole", bound=RoleProtokol)
+TUserRole = TypeVar("TUserRole", bound=UserRoleProtokol)
+TUserClaim = TypeVar("TUserClaim", bound=UserClaimProtokol)
+TUserLogin = TypeVar("TUserLogin", bound=UserLoginProtokol)
+TUserToken = TypeVar("TUserToken", bound=UserTokenProtokol)
+TRoleClaim = TypeVar("TRoleClaim", bound=RoleClaimProtokol)
