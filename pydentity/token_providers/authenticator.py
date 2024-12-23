@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Generic, override, Any
+from typing import TYPE_CHECKING, Generic, Any
 
 from pydentity.interfaces import IUserTwoFactorTokenProvider
 from pydentity.rfc6238service import validate_code
@@ -23,11 +23,9 @@ class AuthenticatorTokenProvider(IUserTwoFactorTokenProvider[TUser], Generic[TUs
         self.digest = digest
         self.interval = interval
 
-    @override
     async def generate(self, manager: "UserManager[TUser]", purpose: str, user: TUser) -> str:
         return ""
 
-    @override
     async def validate(self, manager: "UserManager[TUser]", purpose: str, token: str, user: TUser) -> bool:
         key = await manager.get_authenticator_key(user)
         if is_none_or_space(key):
@@ -36,7 +34,6 @@ class AuthenticatorTokenProvider(IUserTwoFactorTokenProvider[TUser], Generic[TUs
         assert key is not None
         return validate_code(key, token, self.digits, self.digest, self.interval)
 
-    @override
     async def can_generate_two_factor(self, manager: "UserManager[TUser]", user: TUser) -> bool:
         key = await manager.get_authenticator_key(user)
         return not is_none_or_space(key)
