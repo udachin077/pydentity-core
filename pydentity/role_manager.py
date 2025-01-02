@@ -11,7 +11,7 @@ from pydentity.exc import ArgumentNullException, NotSupportedException
 from pydentity.identity_error_describer import IdentityErrorDescriber
 from pydentity.identity_result import IdentityResult
 from pydentity.loggers import role_manager_logger
-from pydentity.resources import Resources
+import pydentity.resources as res
 from pydentity.security.claims import Claim
 from pydentity.types import TRole
 
@@ -298,4 +298,4 @@ class RoleManager(Generic[TRole]):
         if self.supports_role_claims:
             return cast(IRoleClaimStore[TRole], self.store)
 
-        raise NotSupportedException(Resources["StoreNotIRoleClaimStore"])
+        raise NotSupportedException(res.StoreNotIRoleClaimStore)

@@ -1,69 +1,46 @@
-import importlib
-import inspect
-from typing import Sequence, Any
-
-from typing_extensions import deprecated
-
-from pydentity._meta import SingletonMeta
-from pydentity.resources._error_messages import _ERROR_MESSAGES
-
-__all__ = (
-    "Resources",
-    "initialize_resources",
-)
-
-
-class ErrorsModule:
-    def __getitem__(self, item: str) -> str:
-        return _ERROR_MESSAGES[item]
-
-    def __getattr__(self, item: str) -> str:
-        return _ERROR_MESSAGES[item]
-
-    @staticmethod
-    def FormatNoTokenProvider(token_provider: str) -> str:
-        return _ERROR_MESSAGES["NoTokenProvider"].format(token_provider)
-
-
-def _predicate(obj: Any) -> bool:
-    return inspect.isclass(obj) and obj.__name__.endswith("Module")
-
-
-def _get_module_classes(module: str) -> list[tuple[str, type]]:
-    m = importlib.import_module(module)
-    return inspect.getmembers(m, _predicate)
-
-
-def _attr_name(name: str) -> str:
-    return name.removesuffix("Module").lower()
-
-
-class Resources:
-    @deprecated
-    def __class_getitem__(cls, item):
-        return _ERROR_MESSAGES[item]
-
-    def __getattr__(self, item: str) -> str:
-        return _ERROR_MESSAGES[item]
+DefaultError = "An unknown failure has occurred."
+DuplicateEmail = "Email '{0}' is already taken."
+DuplicateRoleName = "Role name '{0}' is already taken."
+DuplicateUserName = "Username '{0}' is already taken."
+InvalidDomain = "Emails from the specified domain '{0}' are prohibited."
+InvalidEmail = "Email '{0}' is invalid."
+InvalidRoleName = "Role name '{0}' is invalid."
+InvalidToken = "Invalid token."
+InvalidUserName = "Username '{0}' is invalid, can only contain letters or digits."
+LoginAlreadyAssociated = "A user with this login already exists."
+NoTokenProvider = "No 'IUserTwoFactorTokenProvider[TUser]' named '{0}' is registered."
+NullSecurityStamp = "User security stamp cannot be null."
+PasswordMismatch = "Incorrect password."
+PasswordRequiresDigit = "Passwords must have at least one digit."
+PasswordRequiresLower = "Passwords must have at least one lowercase."
+PasswordRequiresNonAlphanumeric = "Passwords must have at least one non alphanumeric character."
+PasswordRequiresUniqueChars = "Passwords must use at least {0} different characters."
+PasswordRequiresUpper = "Passwords must have at least one uppercase."
+PasswordTooShort = "Passwords must be at least {0} characters."
+RecoveryCodeRedemptionFailed = "Recovery code redemption failed."
+RoleNotFound = "Role {0} does not exist."
+StoreNotIRoleClaimStore = "Store does not implement 'IRoleClaimStore[TRole]'."
+StoreNotIUserAuthenticationTokenStore = "Store does not implement 'IUserAuthenticationTokenStore[TUser]'."
+StoreNotIUserAuthenticatorKeyStore = "Store does not implement 'IUserAuthenticatorKeyStore[TUser]'."
+StoreNotIUserClaimStore = "Store does not implement 'IUserClaimStore[TUser]'."
+StoreNotIUserConfirmationStore = "Store does not implement 'IUserConfirmationStore[TUser]'."
+StoreNotIUserEmailStore = "Store does not implement 'IUserEmailStore[TUser]'."
+StoreNotIUserLockoutStore = "Store does not implement 'IUserLockoutStore[TUser]'."
+StoreNotIUserLoginStore = "Store does not implement 'IUserLoginStore[TUser]'."
+StoreNotIUserPasswordStore = "Store does not implement 'IUserPasswordStore[TUser]'."
+StoreNotIUserPersonalDataStore = "Store does not implement 'IUserPersonalDataStore[TUser]'."
+StoreNotIUserPhoneNumberStore = "Store does not implement 'IUserPhoneNumberStore[TUser]'."
+StoreNotIUserRoleStore = "Store does not implement 'IUserRoleStore[TUser]'."
+StoreNotIUserSecurityStampStore = "Store does not implement 'IUserSecurityStampStore[TUser]'."
+StoreNotIUserTwoFactorRecoveryCodeStore = "Store does not implement 'IUserTwoFactorRecoveryCodeStore[TUser]'."
+StoreNotIUserTwoFactorStore = "Store does not implement 'IUserTwoFactorStore[TUser]'."
+UserAlreadyHasPassword = "User already has a password set."
+UserAlreadyInRole = "User already in role '{0}'."
+UserLockedOut = "User is locked out."
+UserLockoutNotEnabled = "Lockout is not enabled for this user."
+UserNameNotFound = "User {0} does not exist."
+UserNotInRole = "User is not in role '{0}'."
 
 
-class ResourceManager(metaclass=SingletonMeta):
-    @classmethod
-    def load_modules(cls, *, modules: Sequence[str] | None = ()) -> None:
-        resource_modules = []
-
-        for m in (_get_module_classes(module) for module in modules):
-            resource_modules.extend(m)
-
-        resource_modules.sort()
-
-        for m_name, m_type in resource_modules:
-            setattr(Resources, _attr_name(m_name), m_type())
-
-
-def initialize_resources(*, modules: Sequence[str] | None = ()):
-    ResourceManager.load_modules(modules=[__name__, *modules])
-
-
-# deprecated
-initialize_resources()
+def FormatNoTokenProvider(token_provider: str) -> str:
+    return NoTokenProvider.format(token_provider)

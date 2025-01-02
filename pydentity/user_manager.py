@@ -6,13 +6,14 @@ from typing import Any, Final, Generic, cast, overload
 
 from uuid_extensions import uuid7str
 
-from pydentity.identity_error import IdentityError
+import pydentity.resources as res
 from pydentity.exc import (
     ArgumentNullException,
     InvalidOperationException,
     NotSupportedException,
 )
 from pydentity.hashers.password_hashers import Argon2PasswordHasher
+from pydentity.identity_error import IdentityError
 from pydentity.identity_error_describer import IdentityErrorDescriber
 from pydentity.identity_options import IdentityOptions
 from pydentity.identity_result import IdentityResult
@@ -39,7 +40,6 @@ from pydentity.interfaces.stores import (
 from pydentity.interfaces.token_provider import IUserTwoFactorTokenProvider
 from pydentity.interfaces.user_validator import IUserValidator
 from pydentity.loggers import user_manager_logger
-from pydentity.resources import Resources
 from pydentity.rfc6238service import get_provisioning_uri, generate_key
 from pydentity.security.claims import ClaimsPrincipal, Claim, ClaimTypes
 from pydentity.types import TUser
@@ -589,7 +589,7 @@ class UserManager(Generic[TUser]):
             return stamp
 
         self._logger.debug("`get_security_stamp` for user failed because stamp was None.")
-        raise InvalidOperationException(Resources["NullSecurityStamp"])
+        raise InvalidOperationException(res.NullSecurityStamp)
 
     async def update_security_stamp(self, user: TUser) -> IdentityResult:
         """
@@ -1163,7 +1163,7 @@ class UserManager(Generic[TUser]):
 
             return result
 
-        raise NotSupportedException(Resources.FormatNoTokenProvider(token_provider))
+        raise NotSupportedException(res.FormatNoTokenProvider(token_provider))
 
     async def generate_user_token(self, user: TUser, token_provider: str, purpose: str) -> str:
         """
@@ -1182,7 +1182,7 @@ class UserManager(Generic[TUser]):
         if provider := self._token_providers.get(token_provider):
             return await provider.generate(self, purpose, user)
 
-        raise NotSupportedException(Resources.FormatNoTokenProvider(token_provider))
+        raise NotSupportedException(res.FormatNoTokenProvider(token_provider))
 
     async def get_valid_two_factor_providers(self, user: TUser) -> list[str]:
         """
@@ -1223,7 +1223,7 @@ class UserManager(Generic[TUser]):
 
             return result
 
-        raise NotSupportedException(Resources.FormatNoTokenProvider(token_provider))
+        raise NotSupportedException(res.FormatNoTokenProvider(token_provider))
 
     async def generate_two_factor_token(self, user: TUser, token_provider: str) -> str:
         """
@@ -1241,7 +1241,7 @@ class UserManager(Generic[TUser]):
         if provider := self._token_providers.get(token_provider):
             return await provider.generate(self, "TwoFactor", user)
 
-        raise NotSupportedException(Resources.FormatNoTokenProvider(token_provider))
+        raise NotSupportedException(res.FormatNoTokenProvider(token_provider))
 
     async def get_two_factor_enabled(self, user: TUser) -> bool:
         """
@@ -1648,7 +1648,7 @@ class UserManager(Generic[TUser]):
         This is called before saving the user via create or update.
         """
         if user.security_stamp:
-            raise InvalidOperationException(Resources["NullSecurityStamp"])
+            raise InvalidOperationException(res.NullSecurityStamp)
 
         if self.user_validators:
             errors: list[IdentityError] = []
@@ -1717,64 +1717,64 @@ class UserManager(Generic[TUser]):
     def _get_authentication_token_store(self) -> IUserAuthenticationTokenStore[TUser]:
         if self.supports_user_authentication_tokens:
             return cast(IUserAuthenticationTokenStore[TUser], self.store)
-        raise NotSupportedException(Resources["StoreNotIUserAuthenticationTokenStore"])
+        raise NotSupportedException(res.StoreNotIUserAuthenticationTokenStore)
 
     def _get_authenticator_key_store(self) -> IUserAuthenticatorKeyStore[TUser]:
         if self.supports_user_authenticator_key:
             return cast(IUserAuthenticatorKeyStore[TUser], self.store)
-        raise NotSupportedException(Resources["StoreNotIUserAuthenticatorKeyStore"])
+        raise NotSupportedException(res.StoreNotIUserAuthenticatorKeyStore)
 
     def _get_recovery_code_store(self) -> IUserTwoFactorRecoveryCodeStore[TUser]:
         if self.supports_user_two_factor_recovery_codes:
             return cast(IUserTwoFactorRecoveryCodeStore[TUser], self.store)
-        raise NotSupportedException(Resources["StoreNotIUserTwoFactorRecoveryCodeStore"])
+        raise NotSupportedException(res.StoreNotIUserTwoFactorRecoveryCodeStore)
 
     def _get_two_factor_store(self) -> IUserTwoFactorStore[TUser]:
         if self.supports_user_two_factor:
             return cast(IUserTwoFactorStore[TUser], self.store)
-        raise NotSupportedException(Resources["StoreNotIUserTwoFactorStore"])
+        raise NotSupportedException(res.StoreNotIUserTwoFactorStore)
 
     def _get_password_store(self) -> IUserPasswordStore[TUser]:
         if self.supports_user_password:
             return cast(IUserPasswordStore[TUser], self.store)
-        raise NotSupportedException(Resources["StoreNotIUserPasswordStore"])
+        raise NotSupportedException(res.StoreNotIUserPasswordStore)
 
     def _get_security_store(self) -> IUserSecurityStampStore[TUser]:
         if self.supports_user_security_stamp:
             return cast(IUserSecurityStampStore[TUser], self.store)
-        raise NotSupportedException(Resources["StoreNotIUserSecurityStampStore"])
+        raise NotSupportedException(res.StoreNotIUserSecurityStampStore)
 
     def _get_user_role_store(self) -> IUserRoleStore[TUser]:
         if self.supports_user_role:
             return cast(IUserRoleStore[TUser], self.store)
-        raise NotSupportedException(Resources["StoreNotIUserRoleStore"])
+        raise NotSupportedException(res.StoreNotIUserRoleStore)
 
     def _get_login_store(self) -> IUserLoginStore[TUser]:
         if self.supports_user_login:
             return cast(IUserLoginStore[TUser], self.store)
-        raise NotSupportedException(Resources["StoreNotIUserLoginStore"])
+        raise NotSupportedException(res.StoreNotIUserLoginStore)
 
     def _get_email_store(self) -> IUserEmailStore[TUser]:
         if self.supports_user_email:
             return cast(IUserEmailStore[TUser], self.store)
-        raise NotSupportedException(Resources["StoreNotIUserEmailStore"])
+        raise NotSupportedException(res.StoreNotIUserEmailStore)
 
     def _get_phone_number_store(self) -> IUserPhoneNumberStore[TUser]:
         if self.supports_user_phone_number:
             return cast(IUserPhoneNumberStore[TUser], self.store)
-        raise NotSupportedException(Resources["StoreNotIUserPhoneNumberStore"])
+        raise NotSupportedException(res.StoreNotIUserPhoneNumberStore)
 
     def _get_claim_store(self) -> IUserClaimStore[TUser]:
         if self.supports_user_claim:
             return cast(IUserClaimStore[TUser], self.store)
-        raise NotSupportedException(Resources["StoreNotIUserClaimStore"])
+        raise NotSupportedException(res.StoreNotIUserClaimStore)
 
     def _get_user_lockout_store(self) -> IUserLockoutStore[TUser]:
         if self.supports_user_lockout:
             return cast(IUserLockoutStore[TUser], self.store)
-        raise NotSupportedException(Resources["StoreNotIUserLockoutStore"])
+        raise NotSupportedException(res.StoreNotIUserLockoutStore)
 
     def _get_user_personal_data_store(self) -> IUserPersonalDataStore[TUser]:
         if self.supports_user_personal_data:
             return cast(IUserPersonalDataStore[TUser], self.store)
-        raise NotSupportedException(Resources["StoreNotIUserPersonalDataStore"])
+        raise NotSupportedException(res.StoreNotIUserPersonalDataStore)
