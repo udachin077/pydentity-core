@@ -1,8 +1,6 @@
 import string
 from datetime import timedelta
-from typing import Final, Sequence
-
-from mypyc.ir.ops import Generic
+from typing import Final, Sequence, Generic
 
 from pydentity.interfaces.token_provider import IUserTwoFactorTokenProvider
 from pydentity.security.claims import ClaimTypes
