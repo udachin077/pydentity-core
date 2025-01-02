@@ -1,11 +1,8 @@
 from datetime import datetime
-from typing import TypeVar, Protocol, Callable
+from typing import TypeVar, Protocol
 from uuid import UUID
 
 __all__ = (
-    "Predicate",
-    "Action",
-    "GUID",
     "TKey",
     "UserProtokol",
     "UserRoleProtokol",
@@ -23,18 +20,12 @@ __all__ = (
     "TRoleClaim",
 )
 
-_T = TypeVar("_T")
 TKey = TypeVar("TKey")
-
-Predicate = Callable[[_T], bool]
-Action = Callable[[_T], None]
-
-GUID = UUID | str
 
 
 class UserProtokol(Protocol[TKey]):
     access_failed_count: int
-    concurrency_stamp: GUID | None
+    concurrency_stamp: str | UUID | None
     email: str | None
     email_confirmed: bool
     id: TKey
@@ -45,13 +36,13 @@ class UserProtokol(Protocol[TKey]):
     password_hash: str | None
     phone_number: str | None
     phone_number_confirmed: bool
-    security_stamp: GUID | None
+    security_stamp: str | UUID | None
     two_factor_enabled: bool
     username: str | None
 
 
 class RoleProtokol(Protocol[TKey]):
-    concurrency_stamp: GUID | None
+    concurrency_stamp: str | UUID | None
     id: TKey
     name: str | None
     normalized_name: str | None
