@@ -57,7 +57,7 @@ class Authorize:
         if not context.has_succeeded:
             raise AuthorizationError()
 
-    async def check(self, request: Any) -> None:
+    async def __call__(self, request: Any) -> None:
         context = AuthorizationHandlerContext(request)
         provider = AuthorizationPolicyProvider()
         await self._check_policy(context, provider)
