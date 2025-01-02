@@ -9,11 +9,3 @@ class InvalidOperationException(Exception):
 
 class NotSupportedException(Exception):
     pass
-
-
-class InvalidAlgorithm(Exception):
-    pass
-
-
-class DataProtectorError(Exception):
-    pass
