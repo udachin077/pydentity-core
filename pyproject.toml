@@ -1,0 +1,44 @@
+[tool.poetry]
+name = "pydentity-core"
+version = "0.4.0"
+description = ""
+authors = ["Udachin Ivan <pypi.udachin@yandex.ru>"]
+license = "MIT"
+homepage = "https://github.com/udachin077/pydentity-core"
+repository = "https://github.com/udachin077/pydentity-core.git"
+exclude = ["tests", "example"]
+packages = [{ include = "pydentity", from = "." }]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+email-validator = "^2.2.0"
+itsdangerous = "^2.2.0"
+cryptography = "^44.0.0"
+pyotp = "^2.9.0"
+pyjwt = "^2.10.1"
+pwdlib = { version = "^0.2.1", extras = ["argon2", "bcrypt"] }
+uuid7 = "^0.1.0"
+py-machineid = { version = "^0.6.0", optional = true }
+
+[tool.poetry.dev-dependencies]
+pytest = "*"
+pytest-asyncio = "*"
+
+[tool.poetry.extras]
+machineid = ["py-machineid"]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.mypy]
+exclude = ["tests", "pydentity/ext"]
+disable_error_code = "import-untyped"
+
+[[tool.mypy.overrides]]
+module = ["machineid.*"]
+ignore_missing_imports = true
+
+[tool.ruff]
+line-length = 120
+exclude = ["tests"]
