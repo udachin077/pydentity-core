@@ -1,14 +1,13 @@
-from pydentity import DefaultPersonalDataProtector
-from pydentity.interfaces import IPersonalDataProtector
-
-from pydentity_db.fields import PersonalDataField
+from pydentity.dataprotector import PersonalDataProtector
+from pydentity.ext.sqlalchemy.fields import PersonalDataField
+from pydentity.interfaces.dataprotector import IDataProtector
 
 __all__ = ("use_personal_data_protector",)
 
 
-def use_personal_data_protector(protector: IPersonalDataProtector | None = None) -> None:
+def use_personal_data_protector(protector: IDataProtector | None = None) -> None:
     """
-    Sets the ``IPersonalDataProtector`` for ``ProtectedPersonalDataField`` fields.
+    Sets the *IDataProtector* for *PersonalDataField* fields.
     When using the function, a protector will be installed,
     the data will be encrypted when writing and decrypted when receiving.
     If the value of protector is None, the default protector will be set.
@@ -16,4 +15,4 @@ def use_personal_data_protector(protector: IPersonalDataProtector | None = None)
     :param protector:
     :return:
     """
-    PersonalDataField.protector = protector or DefaultPersonalDataProtector()
+    PersonalDataField.protector = protector or PersonalDataProtector()
