@@ -76,38 +76,38 @@ class UserManager(Generic[TUser]):
 
     def __init__(
         self,
-        store: IUserStore[TUser],
+        user_store: IUserStore[TUser],
         *,
         options: IdentityOptions | None = None,
         password_hasher: IPasswordHasher[TUser] | None = None,
         password_validators: Iterable[IPasswordValidator[TUser]] | None = None,
         user_validators: Iterable[IUserValidator[TUser]] | None = None,
         key_normalizer: ILookupNormalizer | None = None,
-        errors: IdentityErrorDescriber | None = None,
+        error_describer: IdentityErrorDescriber | None = None,
         logger: ILogger["UserManager[TUser]"] | None = None,
     ) -> None:
         """
         Constructs a new instance of *UserManager[TUser]*.
 
-        :param store: The persistence store the manager will operate over.
+        :param user_store: The persistence store the manager will operate over.
         :param options:
         :param password_hasher: The password hashing implementation to use when saving passwords.
         :param password_validators: A collection of *IPasswordValidator[TUser]* to validate passwords against.
         :param user_validators: A collection of *IUserValidator[TUser]* to validate auth against.
         :param key_normalizer: The *ILookupNormalizer* to use when generating index keys for auth.
-        :param errors: The *IdentityErrorDescriber* used to provider error messages.
+        :param error_describer: The *IdentityErrorDescriber* used to provider error messages.
         :param logger: The logger used to log messages, warnings and errors.
         """
-        if not store:
+        if not user_store:
             raise ArgumentNullException("store")
 
-        self.store = store
+        self.store = user_store
         self.options: IdentityOptions = options or IdentityOptions()
         self.password_hasher: IPasswordHasher[TUser] = password_hasher or Argon2PasswordHasher()
         self.password_validators = password_validators
         self.user_validators = user_validators
         self.key_normalizer = key_normalizer
-        self.error_describer: IdentityErrorDescriber = errors or IdentityErrorDescriber()
+        self.error_describer: IdentityErrorDescriber = error_describer or IdentityErrorDescriber()
         self._logger: ILogger["UserManager[TUser]"] | logging.Logger = logger or user_manager_logger
         self._token_providers: dict[str, IUserTwoFactorTokenProvider[TUser]] = dict()
 

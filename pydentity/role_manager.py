@@ -31,29 +31,29 @@ class RoleManager(Generic[TRole]):
 
     def __init__(
         self,
-        store: IRoleStore[TRole],
+        role_store: IRoleStore[TRole],
         *,
         role_validators: Iterable[IRoleValidator[TRole]] | None = None,
         key_normalizer: ILookupNormalizer | None = None,
-        errors: IdentityErrorDescriber | None = None,
+        error_describer: IdentityErrorDescriber | None = None,
         logger: ILogger["RoleManager[TRole]"] | None = None,
     ) -> None:
         """
         Constructs a new instance of *RoleManager[TRole]*.
 
-        :param store: The persistence store the manager will operate over.
+        :param role_store: The persistence store the manager will operate over.
         :param role_validators: A collection of validators for roles.
         :param key_normalizer: The normalizer to use when normalizing role names to keys.
-        :param errors: The *IdentityErrorDescriber* used to provider error messages.
+        :param error_describer: The *IdentityErrorDescriber* used to provider error messages.
         :param logger: The logger used to log messages, warnings and errors.
         """
-        if store is None:
+        if role_store is None:
             raise ArgumentNullException("store")
 
-        self.store = store
+        self.store = role_store
         self.role_validators = role_validators
         self.key_normalizer = key_normalizer
-        self.error_describer: IdentityErrorDescriber = errors or IdentityErrorDescriber()
+        self.error_describer: IdentityErrorDescriber = error_describer or IdentityErrorDescriber()
         self.logger: ILogger["RoleManager[TRole]"] | logging.Logger = logger or role_manager_logger
 
     @property
