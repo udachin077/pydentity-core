@@ -9,3 +9,7 @@ class InvalidOperationException(Exception):
 
 class NotSupportedException(Exception):
     pass
+
+
+class PersonalDataError(Exception):
+    pass
