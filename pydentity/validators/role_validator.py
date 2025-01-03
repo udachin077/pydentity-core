@@ -17,14 +17,14 @@ __all__ = ("RoleValidator",)
 class RoleValidator(IRoleValidator[TRole], Generic[TRole]):
     """Provides the default validation of roles."""
 
-    __slots__ = ("_describer",)
+    __slots__ = ("_error_describer",)
 
-    def __init__(self, errors: IdentityErrorDescriber | None = None) -> None:
+    def __init__(self, error_describer: IdentityErrorDescriber | None = None) -> None:
         """
 
-        :param errors: The *IdentityErrorDescriber* used to provider error messages.
+        :param error_describer: The *IdentityErrorDescriber* used to provider error messages.
         """
-        self._describer = errors or IdentityErrorDescriber()
+        self._error_describer = error_describer or IdentityErrorDescriber()
 
     async def validate(self, manager: "RoleManager[TRole]", role: TRole) -> IdentityResult:
         if manager is None:
@@ -42,9 +42,9 @@ class RoleValidator(IRoleValidator[TRole], Generic[TRole]):
         role_name = await manager.get_role_name(role)
 
         if is_null_or_whitespace(role_name):
-            errors.append(self._describer.InvalidRoleName(role_name))
+            errors.append(self._error_describer.InvalidRoleName(role_name))
             return
 
         if owner := await manager.find_by_name(role_name):  # type:ignore[arg-type]
             if await manager.get_role_id(owner) != await manager.get_role_id(role):
-                errors.append(self._describer.DuplicateRoleName(role_name))  # type:ignore[arg-type]
+                errors.append(self._error_describer.DuplicateRoleName(role_name))  # type:ignore[arg-type]
