@@ -1,4 +1,4 @@
-from datetime import datetime, UTC
+from datetime import datetime
 from typing import Type, Generic, Final, Any
 
 from sqlalchemy import select, delete, insert, update, and_
