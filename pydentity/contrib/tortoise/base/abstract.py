@@ -4,8 +4,8 @@ from uuid import UUID
 
 from tortoise import fields
 
-from pydentity.ext.tortoise.base.model import Model
-from pydentity.ext.tortoise.fields import PersonalDataField
+from pydentity.contrib.tortoise.base.model import Model
+from pydentity.contrib.tortoise.fields import PersonalDataField
 from pydentity.types import TKey
 
 __all__ = (

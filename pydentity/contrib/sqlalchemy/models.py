@@ -4,7 +4,7 @@ import sqlalchemy as sa
 from sqlalchemy.orm import Mapped, mapped_column, declared_attr, relationship
 from uuid_extensions import uuid7str
 
-from pydentity.ext.sqlalchemy.base.abstract import (
+from pydentity.contrib.sqlalchemy.base.abstract import (
     AbstractIdentityUser,
     AbstractIdentityRole,
     AbstractIdentityUserRole,

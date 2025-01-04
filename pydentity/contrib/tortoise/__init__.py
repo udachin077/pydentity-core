@@ -1,5 +1,5 @@
 from pydentity.dataprotector import PersonalDataProtector
-from pydentity.ext.sqlalchemy.fields import PersonalDataField
+from pydentity.contrib.tortoise.fields import PersonalDataField
 from pydentity.interfaces.dataprotector import IDataProtector
 
 __all__ = ("use_personal_data_protector",)

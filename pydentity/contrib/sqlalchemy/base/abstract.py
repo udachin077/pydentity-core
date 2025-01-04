@@ -5,8 +5,8 @@ from uuid import UUID
 import sqlalchemy as sa
 from sqlalchemy.orm import Mapped, mapped_column
 
-from pydentity.ext.sqlalchemy.fields import PersonalDataField
-from pydentity.ext.sqlalchemy.base.model import Model
+from pydentity.contrib.sqlalchemy.fields import PersonalDataField
+from pydentity.contrib.sqlalchemy.base.model import Model
 
 from pydentity.types import TKey
 
